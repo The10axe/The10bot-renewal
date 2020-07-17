@@ -90,6 +90,9 @@ async def on_message(message):
 			if len(message.mentions) == 0:
 				await message.channel.send("Please ping a player to play against.")
 				return
+			elif message.mentions[0] == client.user:
+				await message.channel.send("I can't play against you.")
+				return
 			else:
 				embed = discord.Embed(title="Rock Paper Scissors", description=str(message.author)+" VS "+str(message.mentions[0]), color=0xff0000)
 				embed.add_field(name="Status",value="Waiting for "+str(message.mentions[0])+" to be ready (You have 5 minutes)",inline=False)
