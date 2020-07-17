@@ -44,7 +44,6 @@ async def on_message(message):
 				embed.set_thumbnail(url=message.author.avatar_url)
 				embed.add_field(name="ID:", value=str(message.author.id), inline=False)
 				embed.add_field(name="Came in Discord:", value=str(message.author.created_at)[:-3], inline=False)
-				# embed.add_field(name="Activities:", value=str(message.author.activities))
 				if message.guild != None:
 					embed.add_field(name="Top role in this server:",value=str(message.author.top_role), inline=False)
 					embed.add_field(name="Nickname:", value=str(message.author.display_name), inline=False)
@@ -58,7 +57,6 @@ async def on_message(message):
 				embed.set_thumbnail(url=message.mentions[0].avatar_url)
 				embed.add_field(name="ID:", value=str(message.mentions[0].id), inline=False)
 				embed.add_field(name="Came in Discord:", value=str(message.mentions[0].created_at)[:-3], inline=False)
-				# embed.add_field(name="Activities:", value=str(message.mentions[0].activities))
 				if message.guild != None:
 					embed.add_field(name="Top role in this server:",value=str(message.mentions[0].top_role), inline=False)
 					embed.add_field(name="Nickname:", value=str(message.mentions[0].display_name), inline=False)
