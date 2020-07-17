@@ -1,5 +1,6 @@
 import discord
 import datetime
+import asyncio
 
 client = discord.Client()
 prefix = "/"
