@@ -99,7 +99,9 @@ async def on_message(message):
 					embed = discord.Embed(title="Rock Paper Scissors", description=str(message.author)+" VS "+str(message.mentions[0]), color=0xff0000)
 					embed.add_field(name="Status",value="Battle Canceled",inline=False)
 					await host.edit(content=None,tts=False,embed=embed)
+					await host.clear_reaction('✅')
 				else:
+					await host.clear_reaction('✅')
 					actionA = ""
 					actionB = ""
 					embed = discord.Embed(title="Rock Paper Scissors", description=str(message.author)+" VS "+str(message.mentions[0]), color=0xffff00)
