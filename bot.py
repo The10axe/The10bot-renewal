@@ -21,9 +21,11 @@ async def on_message(message):
 				embed = discord.Embed(title="Help Page", description="For Owner and for Dummies", color=message.author.color)
 			else:
 				embed = discord.Embed(title="Help Page", description="For Users and for Dummies", color=message.author.color)
+			embed.add_field(name="Tooltips:", value="[something] = Optional, <something> = required", inline=False)
 			embed.add_field(name="/help", value="This is what you just did!")
 			embed.add_field(name="/time", value="Gives you the Bot's time.")
 			embed.add_field(name="/info [user]", value="Gives you info about a user, if no user is given, gives info about you")
+			embed.add_field(name="/rps <user>", value="Challenge another user to Rock Paper Scissors")
 			if info.owner == message.author:
 				embed.add_field(name="/stop", value="Stop the bot!")
 			embed.set_footer(text=str(message.author), icon_url=message.author.avatar_url)
@@ -82,6 +84,7 @@ async def on_message(message):
 			return
 
 	if message.content.startswith(prefix+'rps'):
+		print("/rps done by "+str(message.author)+"("+str(message.author.id)+") at "+str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 		async with message.channel.typing():
 			if len(message.mentions) == 0:
 				await message.channel.send("Please ping a player to play against.")
@@ -156,6 +159,7 @@ async def on_message(message):
 							embed.add_field(name="Status",value=status,inline=False)
 							embed.add_field(name="Playback",value=actionA+" VS "+actionB,inline=False)
 							await host.edit(content=None,tts=False,embed=embed)
+		return
 					
 file = open("./settings/token.id", "r")
 Token = file.readline()
