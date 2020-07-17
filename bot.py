@@ -91,7 +91,7 @@ async def on_message(message):
 				await message.channel.send("Please ping a player to play against.")
 				return
 			elif message.mentions[0] == client.user:
-				await message.channel.send("I can't play against you.")
+				await message.channel.send("I read mind like no one elses. ~~I mean, you literally play by telling me what you'll do.~~")
 				return
 			else:
 				embed = discord.Embed(title="Rock Paper Scissors", description=str(message.author)+" VS "+str(message.mentions[0]), color=0xff0000)
