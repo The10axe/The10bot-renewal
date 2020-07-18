@@ -34,6 +34,8 @@ async def on_message(message):
 			embed.add_field(name="/time", value="Gives you the Bot's time.")
 			embed.add_field(name="/info [user]", value="Gives you info about a user, if no user is given, gives info about you")
 			embed.add_field(name="/rps <user>", value="Challenge another user to Rock Paper Scissors")
+			embed.add_field(name="/ping", value="Gives the latency of the bot to Discord")
+			embed.add_field(name="/bot", value="Gives information about the bot!")
 			if info.owner == message.author:
 				embed.add_field(name="/stop", value="Stop the bot!")
 			embed.set_footer(text=str(message.author), icon_url=message.author.avatar_url)
@@ -178,6 +180,28 @@ async def on_message(message):
 							await host.edit(content=None,tts=False,embed=embed)
 							await host.add_reaction('👏')
 		return
+	
+	if message.content.startswith(prefix+'ping'):
+		print("/ping done by "+str(message.author)+"("+str(message.author.id)+") at "+str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+		async with message.channel.typing():
+			embed = discord.Embed(title="I saw chu!", description="Chu forgot to say \"Pong!\".", color=0x00ff00)
+			embed.add_field(name="Ping:",value=str(round(client.latency,4)*1000)+"ms",inline=False)
+			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
+			await message.channel.send(content=None,tts=False,embed=embed)
+		return
+	
+	if message.content.startswith(prefix+'bot'):
+		print("/bot done by "+str(message.author)+"("+str(message.author.id)+") at "+str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+		async with message.channel.typing():
+			embed = discord.Embed(title="The10bot", description="An open source bot coded in Python", url="https://discord.com/api/oauth2/authorize?client_id=426478004298842113&permissions=8&redirect_uri=https%3A%2F%2Fdiscord.com&scope=bot")
+			embed.add_field(name="Source Code",value=str('[Available on Github](https://github.com/The10axe/The10bot-renewal)'), inline=False)
+			embed.add_field(name="Last Update", value="18/07/2020 - 13:30", inline=False)
+			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
+			info = await client.application_info()
+			embed.set_author(name="The10axe", url="https://github.com/The10axe", icon_url=info.owner.avatar_url)
+			await message.channel.send(content=None,tts=False,embed=embed)
+		return
+
 
 # A quick script to open the file having the bot token, get the token and launch the bot with the token
 file = open("./settings/token.id", "r")
