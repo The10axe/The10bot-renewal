@@ -110,76 +110,61 @@ async def on_message(message):
 				await message.channel.send("I read mind like no one elses. ~~I mean, you literally play by telling me what you'll do.~~")
 				return
 			else:
-				embed = discord.Embed(title="Rock Paper Scissors", description=str(message.author)+" VS "+str(message.mentions[0]), color=0xff0000)
-				embed.add_field(name="Status",value="Waiting for "+str(message.mentions[0])+" to be ready (You have 5 minutes)",inline=False)
+				player = [message.author,message.mentions[0]]
+				embed = discord.Embed(title="Rock Paper Scissors", description=str(player[0])+" VS "+str(player[1]), color=0xff0000)
+				embed.add_field(name="Status",value="Waiting for "+str(player[1])+" to be ready (You have 5 minutes)",inline=False)
 				host = await message.channel.send(content=None,tts=False,embed=embed)
 				await host.add_reaction('✅')
 				def check(reaction, user):
-					return (user == message.mentions[0]) and (str(reaction.emoji) == '✅') and (reaction.message.id == host.id)
+					return (user == player[1]) and (str(reaction.emoji) == '✅') and (reaction.message.id == host.id)
 				try:
 					reaction, user = await client.wait_for('reaction_add', timeout=300.0, check=check)
 				except asyncio.TimeoutError:
-					embed = discord.Embed(title="Rock Paper Scissors", description=str(message.author)+" VS "+str(message.mentions[0]), color=0xff0000)
+					embed = discord.Embed(title="Rock Paper Scissors", description=str(player[0])+" VS "+str(player[1]), color=0xff0000)
 					embed.add_field(name="Status",value="Battle Canceled",inline=False)
 					await host.edit(content=None,tts=False,embed=embed)
 					await host.clear_reaction('✅')
 				else:
 					await host.clear_reaction('✅')
-					actionA = ""
-					actionB = ""
-					embed = discord.Embed(title="Rock Paper Scissors", description=str(message.author)+" VS "+str(message.mentions[0]), color=0xffff00)
-					embed.add_field(name="Status",value=str(message.author)+" is playing",inline=False)
-					await host.edit(content=None,tts=False,embed=embed)
-					if message.author.dm_channel == None:
-						await message.author.create_dm()
-					playerA = await message.author.dm_channel.send(content="It's your turn to play! You have 5 minutes!\n"+str(message.author)+" VS "+str(message.mentions[0]))
+					action = ["",""]
 					scheme = ['✊','🖐','✌']
-					for x in scheme:
-						await playerA.add_reaction(x)
-					def checkA(reaction, user):
-						nonlocal actionA
-						actionA = str(reaction.emoji)
-						return (user == message.author) and (str(reaction.emoji) in scheme) and (reaction.message.id == playerA.id)
-					try:
-						reaction, user = await client.wait_for('reaction_add', timeout=300.0, check=checkA)
-					except asyncio.TimeoutError:
-						embed = discord.Embed(title="Rock Paper Scissors", description=str(message.author)+" VS "+str(message.mentions[0]), color=0xff0000)
-						embed.add_field(name="Status",value=str(message.author)+" failed to play in time",inline=False)
+					i = 0
+					for u in player:
+						embed = discord.Embed(title="Rock Paper Scissors", description=str(player[0])+" VS "+str(player[1]), color=0xffff00)
+						embed.add_field(name="Status",value=str(u)+" is playing",inline=False)
 						await host.edit(content=None,tts=False,embed=embed)
-					else:
-						embed = discord.Embed(title="Rock Paper Scissors", description=str(message.author)+" VS "+str(message.mentions[0]), color=0xffff00)
-						embed.add_field(name="Status",value=str(message.mentions[0])+" is playing",inline=False)
-						await host.edit(content=None,tts=False,embed=embed)
-						if message.mentions[0].dm_channel == None:
-							await message.mentions[0].create_dm()
-						playerB = await message.mentions[0].dm_channel.send(content="It's your turn to play! You have 5 minutes!\n"+str(message.author)+" VS "+str(message.mentions[0]))
+						if u.dm_channel == None:
+							await u.create_dm()
+						play = await u.dm_channel.send(content="It's your turn to play! You have 5 minutes!\n"+str(player[0])+" VS "+str(player[1]))
 						for x in scheme:
-							await playerB.add_reaction(x)
-						def checkB(reaction, user):
-							nonlocal actionB
-							actionB = str(reaction.emoji)
-							return (user == message.mentions[0]) and (str(reaction.emoji) in scheme) and (reaction.message.id == playerB.id)
+							await play.add_reaction(x)
+						def checkPlay(reaction, user):
+							nonlocal action
+							nonlocal i
+							action[i] = str(reaction.emoji)
+							return (user == player[i]) and (str(reaction.emoji) in scheme) and (reaction.message.id == play.id)
 						try:
-							reaction, user = await client.wait_for('reaction_add', timeout=300.0, check=checkB)
+							reaction, user = await client.wait_for('reaction_add', timeout=300.0, check=checkPlay)
 						except asyncio.TimeoutError:
-							embed = discord.Embed(title="Rock Paper Scissors", description=str(message.author)+" VS "+str(message.mentions[0]), color=0xff0000)
-							embed.add_field(name="Status",value=str(message.mentions[0])+" failed to play in time",inline=False)
+							embed = discord.Embed(title="Rock Paper Scissors", description=str(player[0])+" VS "+str(player[1]), color=0xff0000)
+							embed.add_field(name="Status",value=str(u)+" failed to play in time",inline=False)
 							await host.edit(content=None,tts=False,embed=embed)
+							return
 						else:
-							status = ""
-							if actionA == actionB:
-								embed = discord.Embed(title="Rock Paper Scissors", description=str(message.author)+" VS "+str(message.mentions[0]), color=0xffa500)
-								status = "Tie"
-							elif (actionA == '🖐' and actionB == '✊') or (actionA == '✊' and actionB == '✌') or (actionA == '✌' and actionB == '🖐'):
-								embed = discord.Embed(title="Rock Paper Scissors", description=str(message.author)+" VS "+str(message.mentions[0]), color=0x00ff00)
-								status = str(message.author)+" won!"
-							else:
-								embed = discord.Embed(title="Rock Paper Scissors", description=str(message.author)+" VS "+str(message.mentions[0]), color=0x00ff00)
-								status = str(message.mentions[0])+" won!"
-							embed.add_field(name="Status",value=status,inline=False)
-							embed.add_field(name="Playback",value=actionA+" VS "+actionB,inline=False)
-							await host.edit(content=None,tts=False,embed=embed)
-							await host.add_reaction('👏')
+							i = i + 1
+					if action[0] == action[1]:
+						embed = discord.Embed(title="Rock Paper Scissors", description=str(player[0])+" VS "+str(player[1]), color=0xffa500)
+						status = "Tie"
+					elif (action[0] == '🖐' and action[1] == '✊') or (action[0] == '✊' and action[1] == '✌') or (action[0] == '✌' and action[1] == '🖐'):
+						embed = discord.Embed(title="Rock Paper Scissors", description=str(player[0])+" VS "+str(player[1]), color=0x00ff00)
+						status = str(player[0])+" won!"
+					else:
+						embed = discord.Embed(title="Rock Paper Scissors", description=str(player[0])+" VS "+str(player[1]), color=0x00ff00)
+						status = str(player[1])+" won!"
+					embed.add_field(name="Status",value=status,inline=False)
+					embed.add_field(name="Playback",value=action[0]+" VS "+action[1],inline=False)
+					await host.edit(content=None,tts=False,embed=embed)
+					await host.add_reaction('👏')
 		return
 	
 	# Gives the bot's delay to Discord's server
