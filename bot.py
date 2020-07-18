@@ -36,6 +36,7 @@ async def on_message(message):
 			embed.add_field(name="/rps <user>", value="Challenge another user to Rock Paper Scissors")
 			embed.add_field(name="/ping", value="Gives the latency of the bot to Discord")
 			embed.add_field(name="/bot", value="Gives information about the bot!")
+			embed.add_field(name="/seek <ID>", value="Gives you info about a user, using their ID")
 			if info.owner == message.author:
 				embed.add_field(name="/stop", value="Stop the bot!")
 			embed.set_footer(text=str(message.author), icon_url=message.author.avatar_url)
@@ -114,7 +115,7 @@ async def on_message(message):
 				host = await message.channel.send(content=None,tts=False,embed=embed)
 				await host.add_reaction('✅')
 				def check(reaction, user):
-					return user == message.mentions[0] and str(reaction.emoji) == '✅'
+					return (user == message.mentions[0]) and (str(reaction.emoji) == '✅') and (reaction.message.id == host.id)
 				try:
 					reaction, user = await client.wait_for('reaction_add', timeout=300.0, check=check)
 				except asyncio.TimeoutError:
@@ -138,7 +139,7 @@ async def on_message(message):
 					def checkA(reaction, user):
 						nonlocal actionA
 						actionA = str(reaction.emoji)
-						return (user == message.author) and (str(reaction.emoji) in scheme)
+						return (user == message.author) and (str(reaction.emoji) in scheme) and (reaction.message.id == playerA.id)
 					try:
 						reaction, user = await client.wait_for('reaction_add', timeout=300.0, check=checkA)
 					except asyncio.TimeoutError:
@@ -157,7 +158,7 @@ async def on_message(message):
 						def checkB(reaction, user):
 							nonlocal actionB
 							actionB = str(reaction.emoji)
-							return (user == message.mentions[0]) and (str(reaction.emoji) in scheme)
+							return (user == message.mentions[0]) and (str(reaction.emoji) in scheme) and (reaction.message.id == playerB.id)
 						try:
 							reaction, user = await client.wait_for('reaction_add', timeout=300.0, check=checkB)
 						except asyncio.TimeoutError:
@@ -197,13 +198,28 @@ async def on_message(message):
 		async with message.channel.typing():
 			embed = discord.Embed(title="The10bot", description="An open source bot coded in Python", url="https://discord.com/api/oauth2/authorize?client_id=426478004298842113&permissions=8&redirect_uri=https%3A%2F%2Fdiscord.com&scope=bot")
 			embed.add_field(name="Source Code",value=str('[Available on Github](https://github.com/The10axe/The10bot-renewal)'), inline=False)
-			embed.add_field(name="Last Update", value="18/07/2020 - 13:30", inline=False)
+			embed.add_field(name="Last Update", value="18/07/2020 - 14:30", inline=False)
 			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 			info = await client.application_info()
 			embed.set_author(name="The10axe", url="https://github.com/The10axe", icon_url=info.owner.avatar_url)
 			await message.channel.send(content=None,tts=False,embed=embed)
 		return
 
+	# Get a user's info with ID
+	if message.content.startswith(prefix+'seek'):
+		print("/seek done by "+str(message.author)+"("+str(message.author.id)+") at "+str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+		async with message.channel.typing():
+			seek = client.get_user(int(message.content[6:]))
+			if seek == None:
+				await message.channel.send("Aucun résultat trouvé")
+			else:
+				embed = discord.Embed(title="Info about "+str(seek), description=None, color=seek.color)
+				embed.set_thumbnail(url=seek.avatar_url)
+				embed.add_field(name="ID:", value=str(seek.id), inline=False)
+				embed.add_field(name="Came in Discord:", value=str(seek.created_at)[:-3], inline=False)
+				# embed.add_field(name="Activities:", value=str(message.author.activities))
+				await message.channel.send(content=None,tts=False,embed=embed)
+		return
 
 # A quick script to open the file having the bot token, get the token and launch the bot with the token
 file = open("./settings/token.id", "r")
