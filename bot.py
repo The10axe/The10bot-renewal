@@ -3,17 +3,23 @@ import datetime
 import asyncio
 
 client = discord.Client()
+# Change this to change the prefix of the bot:
 prefix = "/"
 
+# This will play when bot is ready:
 @client.event
 async def on_ready():
     print('Logged in as '+ str(client.user))
 
+# This will trigger when bot see a message.
+# It will store every info about the message in the var "message"
 @client.event
 async def on_message(message):
+	# We prevent the bot from triggering its own commands
 	if message.author == client.user:
 		return
 	
+	# The command help, that makes an embed fields about everything possible with the bot
 	if message.content.startswith(prefix+'help'):
 		print("/help done by "+str(message.author)+"("+str(message.author.id)+") at "+str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 		info = await client.application_info()
@@ -33,12 +39,16 @@ async def on_message(message):
 			await message.channel.send(content=None,tts=False,embed=embed)
 		return
 	
+	# Just print out the time
 	if message.content.startswith(prefix+'time'):
 		print("/time done by "+str(message.author)+"("+str(message.author.id)+") at "+str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 		async with message.channel.typing():
 			await message.channel.send("Il est: "+str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 		return
 
+	# Gives info about a user, if none is given, gives info about yourself.
+	# Can give: ID, Time account is made, Username, User Profile Picture
+	# If in a guild, will give: Nickname, Top role of the server, Color of the top role, status
 	if message.content.startswith(prefix+'info'):
 		print("/info done by "+str(message.author)+"("+str(message.author.id)+") at "+str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 		async with message.channel.typing():
@@ -71,6 +81,7 @@ async def on_message(message):
 		await message.channel.send(content=None,tts=False,embed=embed)
 		return
 
+	# Owner only command, makes the bot shutdown
 	if message.content.startswith(prefix+'stop'):
 		print("/stop done by "+str(message.author)+"("+str(message.author.id)+") at "+str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 		info = await client.application_info()
@@ -84,6 +95,7 @@ async def on_message(message):
 		else:
 			return
 
+	# A very basic Rock Paper Scissors
 	if message.content.startswith(prefix+'rps'):
 		print("/rps done by "+str(message.author)+"("+str(message.author.id)+") at "+str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 		async with message.channel.typing():
@@ -163,11 +175,13 @@ async def on_message(message):
 							embed.add_field(name="Status",value=status,inline=False)
 							embed.add_field(name="Playback",value=actionA+" VS "+actionB,inline=False)
 							await host.edit(content=None,tts=False,embed=embed)
+							await host.add_reaction('👏')
 		return
-					
+
+# A quick script to open the file having the bot token, get the token and launch the bot with the token
 file = open("./settings/token.id", "r")
 Token = file.readline()
 file.close()
-# print("Token: "+str(Token))
+# print("Token: "+str(Token)) # Uncomment this line to see in the CMD what is your bot's current token
 print("Discord Version is: "+str(discord.version_info.releaselevel)+" "+str(discord.__version__))
 client.run(Token)
