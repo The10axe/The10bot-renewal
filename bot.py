@@ -181,6 +181,7 @@ async def on_message(message):
 							await host.add_reaction('👏')
 		return
 	
+	# Gives the bot's delay to Discord's server
 	if message.content.startswith(prefix+'ping'):
 		print("/ping done by "+str(message.author)+"("+str(message.author.id)+") at "+str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 		async with message.channel.typing():
@@ -190,6 +191,7 @@ async def on_message(message):
 			await message.channel.send(content=None,tts=False,embed=embed)
 		return
 	
+	# Gives some bot's info
 	if message.content.startswith(prefix+'bot'):
 		print("/bot done by "+str(message.author)+"("+str(message.author.id)+") at "+str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 		async with message.channel.typing():
