@@ -1,4 +1,5 @@
 import discord
+# Discord API Reference: https://discordpy.readthedocs.io/en/v1.3.4/api.html
 import datetime
 import asyncio
 
@@ -65,7 +66,7 @@ async def on_message(message):
 					embed.add_field(name="Came in Guild:", value=str(message.author.joined_at)[:-3], inline=False)
 			else:
 				if message.mentions[0] == client.user:
-					embed = discord.Embed(title="Info about "+str(message.mentions[0]), description=None, color=message.mentions[0].color, url="https://discord.com/api/oauth2/authorize?client_id=426478004298842113&permissions=8&redirect_uri=http%3A%2F%2Fdiscord.com%2F&scope=bot")
+					embed = discord.Embed(title="Info about "+str(message.mentions[0]), description=None, color=message.mentions[0].color, url="https://discord.com/api/oauth2/authorize?client_id=426478004298842113&permissions=8&redirect_uri=https%3A%2F%2Fdiscord.com&scope=bot")
 				else:
 					embed = discord.Embed(title="Info about "+str(message.mentions[0]), description=None, color=message.mentions[0].color)
 				embed.set_thumbnail(url=message.mentions[0].avatar_url)
