@@ -132,7 +132,7 @@ async def on_message(message):
 					await host.edit(content=None,tts=False,embed=embed)
 					if message.author.dm_channel == None:
 						await message.author.create_dm()
-					playerA = await message.author.dm_channel.send(content="It's your turn to play! You have 5 minutes!")
+					playerA = await message.author.dm_channel.send(content="It's your turn to play! You have 5 minutes!\n"+str(message.author)+" VS "+str(message.mentions[0]))
 					scheme = ['✊','🖐','✌']
 					for x in scheme:
 						await playerA.add_reaction(x)
@@ -152,7 +152,7 @@ async def on_message(message):
 						await host.edit(content=None,tts=False,embed=embed)
 						if message.mentions[0].dm_channel == None:
 							await message.mentions[0].create_dm()
-						playerB = await message.mentions[0].dm_channel.send(content="It's your turn to play! You have 5 minutes!")
+						playerB = await message.mentions[0].dm_channel.send(content="It's your turn to play! You have 5 minutes!\n"+str(message.author)+" VS "+str(message.mentions[0]))
 						for x in scheme:
 							await playerB.add_reaction(x)
 						def checkB(reaction, user):
