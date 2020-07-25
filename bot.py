@@ -306,6 +306,7 @@ async def on_message(message):
 				if error > 0:
 						embed = discord.Embed(title="What's written?", description=str(message.author)+" has forced result", color=0x00ff00)
 						embed.add_field(name="Language", value=lang.capitalize(), inline=False)
+						embed.add_field(name="Error", value=str(error), inline=False)
 						embed.add_field(name="Encrypted sentences", value="`"+encrypted+"`",inline=False)
 						embed.add_field(name="Sentences", value="`"+original+"`",inline=False)
 						await message.channel.send(content=None,tts=False,embed=embed)
@@ -339,7 +340,7 @@ async def on_message(message):
 						await host.edit(content=None,tts=False,embed=embed)
 						return
 			else:
-				await message.channel.send(content="Message is invalid: `"+str(message.content)+"`",tts=False,embed=None)
+				await message.channel.send(content="Message of "+message.author.mention+" is invalid: `"+str(message.content)+"`\n"+str(error)+" error(s) has been found",tts=False,embed=None)
 				return
 
 # A quick script to open the file having the bot token, get the token and launch the bot with the token
