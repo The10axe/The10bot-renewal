@@ -238,16 +238,16 @@ async def on_message(message):
 			for x in range(1,len(traitement)):
 				if traitement[x].startswith("-"):
 					if traitement[x].startswith("-lang:"):
-						if traitement[x][6:] in available_lang:
-							lang = traitement[x][6:]
+						if traitement[x][6:].lower() in available_lang:
+							lang = traitement[x][6:].lower()
 					if traitement[x].startswith("-time:"):
 						if str(int(traitement[x][6:])) == traitement[x][6:]:
 							time = float(int(traitement[x][6:]))
 							if time < 1 or time > 3600:
 								time = 300
 					if traitement[x].startswith("-force:"):
-						if bool(traitement[x][7:].capitalize()) in [True, False]:
-							force = bool(traitement[x][7:].capitalize())
+						if bool(traitement[x][7:].lower().capitalize()) in [True, False]:
+							force = bool(traitement[x][7:].lower().capitalize())
 				elif lock == False:
 					sentence_start = x
 					lock = True
