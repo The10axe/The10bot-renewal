@@ -38,6 +38,7 @@ async def on_message(message):
 			embed.add_field(name="/ping", value="Gives the latency of the bot to Discord")
 			embed.add_field(name="/bot", value="Gives information about the bot!")
 			embed.add_field(name="/seek <ID>", value="Gives you info about a user, using their ID")
+			embed.add_field(name="/sncf", value="The satanic invocation of a french train")
 			embed.add_field(name="/crypto [-lang:<morse|binary|hexadecimal|octal>] [-time:<seconds>] [-force:<true|false>] [sentences]", value="Starts a game where you need to guess what's written in a language, if nothing is given, a convertion table will be displayed, if only a sentences is given, the game start with default rules which is 300s (5 minutes) and a random language.", inline=False)
 			if info.owner == message.author:
 				embed.add_field(name="/stop", value="Stop the bot!")
@@ -342,6 +343,56 @@ async def on_message(message):
 			else:
 				await message.channel.send(content="Message of "+message.author.mention+" is invalid: `"+str(message.content)+"`\n"+str(error)+" error(s) has been found",tts=False,embed=None)
 				return
+
+	if message.content.startswith(prefix+'sncf'):
+		print("/sncf done by "+str(message.author)+"("+str(message.author.id)+") at "+str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+		if message.author.voice.channel != None:
+			voice_chat = await message.author.voice.channel.connect(timeout=60)
+			voice_chat.play(discord.FFmpegPCMAudio('./sound/SNCF.mp3'), after=None)
+			while voice_chat.is_playing() == True:
+				await asyncio.sleep(1)
+			await voice_chat.disconnect()
+			minutes = random.randint(5,360)
+			if minutes < 60:
+				messagea = "The TER train n°"+str(random.randint(1000,999999))+" is "+str(minutes)+" minutes late!"
+			else:
+				heures = 0
+				while minutes > 59:
+					heures = heures + 1
+					minutes = minutes - 60
+				if heures == 1:
+					heure = "1 hour"
+				else:
+					heure = str(heures)+" hours"
+				if minutes < 2:
+					minute = str(minutes)+" minute"
+				else:
+					minute = str(minutes)+" minutes"
+				messagea = "The TER train n°"+str(random.randint(1000,999999))+" is "+heure+" and "+minute+" late!"
+			embed = discord.Embed(title="SNCF", description=messagea,color=0x000000)
+			embed.set_image(url="https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Logo_TER.svg/1920px-Logo_TER.svg.png")
+			await message.channel.send(content=None,tts=False,embed=embed)
+		elif message.author.voice.channel == None:
+			minutes = random.randint(5,360)
+			if minutes < 60:
+				messagea = "The TER train n°"+str(random.randint(1000,999999))+" is "+str(minutes)+" minutes late!"
+			else:
+				heures = 0
+				while minutes > 59:
+					heures = heures + 1
+					minutes = minutes - 60
+				if heures == 1:
+					heure = "1 hour"
+				else:
+					heure = str(heures)+" hours"
+				if minutes < 2:
+					minute = str(minutes)+" minute"
+				else:
+					minute = str(minutes)+" minutes"
+				messagea = "The TER train n°"+str(random.randint(1000,999999))+" is "+heure+" and "+minute+" late!"
+			embed = discord.Embed(title="SNCF", description=messagea,color=0x000000)
+			embed.set_image(url="https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Logo_TER.svg/1920px-Logo_TER.svg.png")
+			await message.channel.send(content=None,tts=False,embed=embed)
 
 # A quick script to open the file having the bot token, get the token and launch the bot with the token
 file = open("./settings/token.id", "r")
