@@ -220,11 +220,11 @@ async def on_message(message):
 			embed = discord.Embed(title="Converting table for "+str(message.author), description="Part 1", color=message.author.color)
 			embed.add_field(name="Allowed character",value="Binary | Octal | Hexadecimal\nMorse", inline=False)
 			for x in range(0,24):
-				embed.add_field(name=("`"+lettre[x]+"`"),value=("`"+str(binaire[x])+" | "+str(octal[x])+" | "+str(hexa[x])+"`\n`"+str(morse[x])+"`"))
+				embed.add_field(name=("`"+lettre[x]+"`"),value=("`"+str(binary[x])+" | "+str(octal[x])+" | "+str(hexa[x])+"`\n`"+str(morse[x])+"`"))
 			await message.channel.send(content=None,tts=False,embed=embed)
 			embed = discord.Embed(title="Converting table for "+str(message.author), description="Part 2", color=message.author.color)
 			for x in range(24,len(lettre)):
-				embed.add_field(name=("`"+lettre[x]+"`"),value=("`"+str(binaire[x])+" | "+str(octal[x])+" | "+str(hexa[x])+"`\n`"+str(morse[x])+"`"))
+				embed.add_field(name=("`"+lettre[x]+"`"),value=("`"+str(binary[x])+" | "+str(octal[x])+" | "+str(hexa[x])+"`\n`"+str(morse[x])+"`"))
 			await message.channel.send(content=None,tts=False,embed=embed)
 		else:
 			await message.delete()
