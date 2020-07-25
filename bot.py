@@ -227,6 +227,7 @@ async def on_message(message):
 				embed.add_field(name=("`"+lettre[x]+"`"),value=("`"+str(binaire[x])+" | "+str(octal[x])+" | "+str(hexa[x])+"`\n`"+str(morse[x])+"`"))
 			await message.channel.send(content=None,tts=False,embed=embed)
 		else:
+			await message.delete()
 			# Getting args
 			available_lang = ["morse","binary","hexadecimal","octal"]
 			lang = random.choice(available_lang)
@@ -299,13 +300,17 @@ async def on_message(message):
 								encrypted = encrypted + str(octal[i]) + " "
 							found = True
 				if found == False:
+					encrypted = encrypted + "? "
 					error = error + 1
 			if error == 0 or force == True:
 				if error > 0:
-					await message.channel.send(content=str(error)+" error(s) were found but the result has been forced!",tts=False,embed=None)
-					await message.channel.send(content=("`"+encrypted+"`"),tts=False,embed=None)
+						embed = discord.Embed(title="What's written?", description=str(message.author)+" has forced result", color=0x00ff00)
+						embed.add_field(name="Language", value=lang.capitalize(), inline=False)
+						embed.add_field(name="Encrypted sentences", value="`"+encrypted+"`",inline=False)
+						embed.add_field(name="Sentences", value="`"+original+"`",inline=False)
+						await message.channel.send(content=None,tts=False,embed=embed)
+						return
 				else:
-					await message.delete()
 					embed = discord.Embed(title="What's written?", description=str(message.author)+" has started a game", color=message.author.color)
 					embed.add_field(name="Language", value=lang.capitalize(), inline=False)
 					embed.add_field(name="Time", value=str(time)+"s", inline=False)
@@ -334,6 +339,7 @@ async def on_message(message):
 						await host.edit(content=None,tts=False,embed=embed)
 						return
 			else:
+				await message.channel.send(content="Message is invalid: `"+str(message.content)+"`",tts=False,embed=None)
 				return
 
 # A quick script to open the file having the bot token, get the token and launch the bot with the token
