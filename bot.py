@@ -2,6 +2,7 @@ import discord
 # Discord API Reference: https://discordpy.readthedocs.io/en/v1.3.4/api.html
 import datetime
 import asyncio
+import random
 
 client = discord.Client()
 # Change this to change the prefix of the bot:
@@ -37,6 +38,7 @@ async def on_message(message):
 			embed.add_field(name="/ping", value="Gives the latency of the bot to Discord")
 			embed.add_field(name="/bot", value="Gives information about the bot!")
 			embed.add_field(name="/seek <ID>", value="Gives you info about a user, using their ID")
+			embed.add_field(name="/crypto [-lang:<morse|binary|hexadecimal|octal] [-time:<seconds>] [-force:<true|false>] [sentences]", value="Starts a game where you need to guess what's written in a language, if nothing is given, a convertion table will be displayed, if only a sentences is given, the game start with default rules which is 300s (5 minutes) and a random language.", inline=False)
 			if info.owner == message.author:
 				embed.add_field(name="/stop", value="Stop the bot!")
 			embed.set_footer(text=str(message.author), icon_url=message.author.avatar_url)
@@ -205,6 +207,133 @@ async def on_message(message):
 				# embed.add_field(name="Activities:", value=str(message.author.activities))
 				await message.channel.send(content=None,tts=False,embed=embed)
 		return
+	
+	if message.content.startswith(prefix+'crypto'):
+		morse = ["·-","-···","-·-·", "-··","·","··-·","--·","····","··","·---","-·-","·-··","--","-·","---","·--·","--·-","·-·","···","-","··-","···-","·--","-··-","-·--","--··","·----","··---","···--","····-","·····","-····","--···","---··","----·","-----","   "]
+		lettre = ["A", "B", "C", "D", "E", "F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","1","2","3","4","5","6","7","8","9","0"," "]
+		binary = ["01000001","01000010","01000011","01000100","01000101","01000110","01000111","01001000","01001001","01001010","01001011","01001100","01001101","01001110","01001111","01010000","01010001","01010010","01010011","01010100","01010101","01010110","01010111","01011000","01011001","01011010","00110001","00110010","00110011","00110100","00110101","00110110","00110111","00111000","00111001","00110000","00100000"]
+		hexa=["41","42","43","44","45","46","47","48","49","4A","4B","4C","4D","4E","4F","50","51","52","53","54","55","56","57","58","59","5A","31","32","33","34","35","36","37","38","39","30","20"]
+		octal=["101","102","103","104","105","106","107","110","111","112","113","114","115","116","117","120","121","122","123","124","125","126","127","130","131","132","061","062","063","064","065","066","067","070","071","060","040"]
+		traitement = message.content.split(" ")
+		if len(traitement) == 1:
+			embed = discord.Embed(title="Converting table for "+str(message.author), description="Part 1", color=message.author.color)
+			embed.add_field(name="Allowed character",value="Binary | Octal | Hexadecimal\nMorse", inline=False)
+			for x in range(0,24):
+				embed.add_field(name=("`"+lettre[x]+"`"),value=("`"+str(binaire[x])+" | "+str(octal[x])+" | "+str(hexa[x])+"`\n`"+str(morse[x])+"`"))
+			await message.channel.send(content=None,tts=False,embed=embed)
+			embed = discord.Embed(title="Converting table for "+str(message.author), description="Part 2", color=message.author.color)
+			for x in range(24,len(lettre)):
+				embed.add_field(name=("`"+lettre[x]+"`"),value=("`"+str(binaire[x])+" | "+str(octal[x])+" | "+str(hexa[x])+"`\n`"+str(morse[x])+"`"))
+			await message.channel.send(content=None,tts=False,embed=embed)
+		else:
+			# Getting args
+			available_lang = ["morse","binary","hexadecimal","octal"]
+			lang = random.choice(available_lang)
+			time = 300
+			sentence_start = None
+			lock = False
+			force = False
+			for x in range(1,len(traitement)):
+				if traitement[x].startswith("-"):
+					if traitement[x].startswith("-lang:"):
+						if traitement[x][6:] in available_lang:
+							lang = traitement[x][6:]
+					if traitement[x].startswith("-time:"):
+						if str(int(traitement[x][6:])) == traitement[x][6:]:
+							time = float(int(traitement[x][6:]))
+							if time < 1 or time > 3600:
+								time = 300
+					if traitement[x].startswith("-force:"):
+						if bool(traitement[x][7:].capitalize()) in [True, False]:
+							force = bool(traitement[x][7:].capitalize())
+				elif lock == False:
+					sentence_start = x
+					lock = True
+			#Grabing sentence
+			sentence = ""
+			for x in range(sentence_start, len(traitement)):
+				if x == len(traitement)-1:
+					sentence = sentence + str(traitement[x])
+				else:
+					sentence = sentence + str(traitement[x]) + " "
+			original = sentence.strip()
+			sentence = sentence.upper().strip()
+			#Converting to language
+			encrypted = ""
+			error = 0
+			for x in range(0,len(sentence)):
+				found = False
+				if lang == "morse":
+					for i in range(0,len(lettre)):
+						if sentence[x] == lettre[i]:
+							if (x == len(sentence)-1) or sentence[x] == " ":
+								encrypted = encrypted + str(morse[i])
+							elif sentence[x+1] == " ":
+								encrypted = encrypted + str(morse[i])
+							else:
+								encrypted = encrypted + str(morse[i]) + " "
+							found = True
+				if lang == "binary":
+					for i in range(0,len(lettre)):
+						if sentence[x] == lettre[i]:
+							if (x == len(sentence)-1):
+								encrypted = encrypted + str(binary[i])
+							else:
+								encrypted = encrypted + str(binary[i]) + " "
+							found = True
+				if lang == "hexadecimal":
+					for i in range(0,len(lettre)):
+						if sentence[x] == lettre[i]:
+							if (x == len(sentence)-1):
+								encrypted = encrypted + str(hexa[i])
+							else:
+								encrypted = encrypted + str(hexa[i]) + " "
+							found = True
+				if lang == "octal":
+					for i in range(0,len(lettre)):
+						if sentence[x] == lettre[i]:
+							if (x == len(sentence)-1):
+								encrypted = encrypted + str(octal[i])
+							else:
+								encrypted = encrypted + str(octal[i]) + " "
+							found = True
+				if found == False:
+					error = error + 1
+			if error == 0 or force == True:
+				if error > 0:
+					await message.channel.send(content=str(error)+" error(s) were found but the result has been forced!",tts=False,embed=None)
+					await message.channel.send(content=("`"+encrypted+"`"),tts=False,embed=None)
+				else:
+					await message.delete()
+					embed = discord.Embed(title="What's written?", description=str(message.author)+" has started a game", color=message.author.color)
+					embed.add_field(name="Language", value=lang, inline=False)
+					embed.add_field(name="Time", value=str(time)+"s", inline=False)
+					embed.add_field(name="Encrypted sentences", value="`"+encrypted+"`",inline=False)
+					host = await message.channel.send(content=None,tts=False,embed=embed)
+					def check(m):
+						return m.content.upper() == sentence and m.channel == message.channel
+					try:
+						winner = await client.wait_for('message', timeout=time, check=check)
+					except asyncio.TimeoutError:
+						embed = discord.Embed(title="What's written?", description=str(message.author)+" has started the game", color=0xff0000)
+						embed.add_field(name="Language", value=lang.capitalize(), inline=False)
+						embed.add_field(name="Time", value="Finished", inline=False)
+						embed.add_field(name="Encrypted sentences", value="`"+encrypted+"`",inline=False)
+						embed.add_field(name="Sentences", value="`"+original+"`",inline=False)
+						embed.add_field(name="Winner", value=str(client.user), inline=False)
+						await host.edit(content=None,tts=False,embed=embed)
+						return
+					else:
+						embed = discord.Embed(title="What's written?", description=str(message.author)+" has started the game", color=0x00ff00)
+						embed.add_field(name="Language", value=lang.capitalize(), inline=False)
+						embed.add_field(name="Time", value="Finished", inline=False)
+						embed.add_field(name="Encrypted sentences", value="`"+encrypted+"`",inline=False)
+						embed.add_field(name="Sentences", value="`"+original+"`",inline=False)
+						embed.add_field(name="Winner", value=str(winner.author), inline=False)
+						await host.edit(content=None,tts=False,embed=embed)
+						return
+			else:
+				return
 
 # A quick script to open the file having the bot token, get the token and launch the bot with the token
 file = open("./settings/token.id", "r")
