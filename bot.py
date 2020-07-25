@@ -549,6 +549,7 @@ async def on_message(message):
 							embed.add_field(name="Current turn", value=str(player[x]))
 							embed.add_field(name="Player that finished", value=str(finish.count(True)))
 							embed.add_field(name="Player that went AFK", value=str(afk.count(True)))
+							embed.add_field(name="Player that haven't guessed", value=str(len(player)-(afk.count(True)+finish.count(True))))
 							await host.edit(content=None,tts=False,embed=embed)
 							embed = discord.Embed(title="What's the number?", description="It's your turn!", color=0xffff00)
 							embed.add_field(name="Minimum", value=mini)
@@ -582,7 +583,7 @@ async def on_message(message):
 								number[x] = int(played.content)
 								if number[x] == target:
 									finish[x] = True
-									await player[x].dm_channel.send(content="You nailed it!",tts=False,embed=None)
+									await player[x].dm_channel.send(content="I'd have done better! ~~I mean, I'm the one that made up that number, right?~~",tts=False,embed=None)
 								else:
 									await player[x].dm_channel.send(content="Ok!",tts=False,embed=None)
 				embed = discord.Embed(title="What's the number?", description="The game has ended", color=0x00ff00)
