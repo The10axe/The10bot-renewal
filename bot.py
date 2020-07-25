@@ -39,6 +39,7 @@ async def on_message(message):
 			embed.add_field(name="/bot", value="Gives information about the bot!")
 			embed.add_field(name="/seek <ID>", value="Gives you info about a user, using their ID")
 			embed.add_field(name="/sncf", value="The satanic invocation of a french train")
+			embed.add_field(name="/wtn [-min:<value>] [-max:<value>] [user]", value="Begin a \"What's the number\" game")
 			embed.add_field(name="/crypto [-lang:<morse|binary|hexadecimal|octal>] [-time:<seconds>] [-force:<true|false>] [sentences]", value="Starts a game where you need to guess what's written in a language, if nothing is given, a convertion table will be displayed, if only a sentences is given, the game start with default rules which is 300s (5 minutes) and a random language.", inline=False)
 			if info.owner == message.author:
 				embed.add_field(name="/stop", value="Stop the bot!")
@@ -186,7 +187,7 @@ async def on_message(message):
 		async with message.channel.typing():
 			embed = discord.Embed(title="The10bot", description="An open source bot coded in Python", url="https://discord.com/api/oauth2/authorize?client_id=426478004298842113&permissions=8&redirect_uri=https%3A%2F%2Fdiscord.com&scope=bot")
 			embed.add_field(name="Source Code",value=str('[Available on Github](https://github.com/The10axe/The10bot-renewal)'), inline=False)
-			embed.add_field(name="Last Update", value="25/07/2020 - 16:00", inline=False)
+			embed.add_field(name="Last Update", value="25/07/2020 - 23:35", inline=False)
 			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 			info = await client.application_info()
 			embed.set_author(name="The10axe", url="https://github.com/The10axe", icon_url=info.owner.avatar_url)
@@ -209,6 +210,7 @@ async def on_message(message):
 				await message.channel.send(content=None,tts=False,embed=embed)
 		return
 	
+	# A game about encrypted messages
 	if message.content.startswith(prefix+'crypto'):
 		print("/crypto done by "+str(message.author)+"("+str(message.author.id)+") at "+str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 		morse = ["·-","-···","-·-·", "-··","·","··-·","--·","····","··","·---","-·-","·-··","--","-·","---","·--·","--·-","·-·","···","-","··-","···-","·--","-··-","-·--","--··","·----","··---","···--","····-","·····","-····","--···","---··","----·","-----","   "]
@@ -344,6 +346,7 @@ async def on_message(message):
 				await message.channel.send(content="Message of "+message.author.mention+" is invalid: `"+str(message.content)+"`\n"+str(error)+" error(s) has been found",tts=False,embed=None)
 				return
 
+	# SNCF commend
 	if message.content.startswith(prefix+'sncf'):
 		print("/sncf done by "+str(message.author)+"("+str(message.author.id)+") at "+str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 		if message.author.voice.channel != None:
@@ -370,7 +373,7 @@ async def on_message(message):
 					minute = str(minutes)+" minutes"
 				messagea = "The TER train n°"+str(random.randint(1000,999999))+" is "+heure+" and "+minute+" late!"
 			embed = discord.Embed(title="SNCF", description=messagea,color=0x000000)
-			embed.set_image(url="https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Logo_TER.svg/1920px-Logo_TER.svg.png")
+			embed.set_thumbnail(url="https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Logo_TER.svg/1920px-Logo_TER.svg.png")
 			await message.channel.send(content=None,tts=False,embed=embed)
 		elif message.author.voice.channel == None:
 			minutes = random.randint(5,360)
@@ -391,8 +394,225 @@ async def on_message(message):
 					minute = str(minutes)+" minutes"
 				messagea = "The TER train n°"+str(random.randint(1000,999999))+" is "+heure+" and "+minute+" late!"
 			embed = discord.Embed(title="SNCF", description=messagea,color=0x000000)
-			embed.set_image(url="https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Logo_TER.svg/1920px-Logo_TER.svg.png")
+			embed.set_thumbnail(url="https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Logo_TER.svg/1920px-Logo_TER.svg.png")
 			await message.channel.send(content=None,tts=False,embed=embed)
+	
+	# Number guessing game
+	if message.content.startswith(prefix+'wtn'):
+		print("/wtn done by "+str(message.author)+"("+str(message.author.id)+") at "+str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+		traitement = message.content.split(" ")
+		mini = 0
+		maxi = 10000
+		for x in range(1,len(traitement)):
+			if traitement[x].startswith("-"):
+				if traitement[x].startswith("-min:"):
+					if str(int(traitement[x][5:])) == traitement[x][5:]:
+						mini = int(traitement[x][5:])
+						if mini < 0:
+							mini = 0
+				if traitement[x].startswith("-max:"):
+					if str(int(traitement[x][5:])) == traitement[x][5:]:
+						maxi = int(traitement[x][5:])
+						if maxi < 0:
+							maxi = 10000
+		if maxi == mini:
+			await message.channel.send(content="Max is equal to min",tts=False,embed=None)
+			return
+		elif maxi < mini:
+			swap = maxi
+			maxi = mini
+			mini = swap
+		target = int(random.randint(mini,maxi))
+		if len(message.mentions) == 0:
+			embed = discord.Embed(title="What's the number?", description=str(message.author)+" has started a game", color=0xffff00)
+			embed.add_field(name="Minimum", value=mini)
+			embed.add_field(name="Maximum", value=maxi)
+			host = await message.channel.send(content=None,tts=False,embed=embed)
+			score = 0
+			if message.author.dm_channel == None:
+				await message.author.create_dm()
+			play = await message.author.dm_channel.send(content=None,tts=False,embed=embed)
+			ongoing = True
+			while ongoing == True:
+				def check(m):
+					test = m.content
+					try:
+						int(test)
+					except ValueError:
+						test = -1
+					else:
+						test = int(test)
+					return (test >= mini) and (test <= maxi) and (m.channel.id == message.author.dm_channel.id)
+				try:
+					played = await client.wait_for('message', timeout=300, check=check)
+				except asyncio.TimeoutError:
+					embed = discord.Embed(title="What's the number?", description=str(message.author)+" has finished a game", color=0xff0000)
+					embed.add_field(name="Minimum", value=mini)
+					embed.add_field(name="Maximum", value=maxi)
+					embed.add_field(name="Score", value="Cancelled")
+					embed.add_field(name="Number to find", value=target)
+					await host.edit(content=None,tts=False,embed=embed)
+					ongoing = False
+					return
+				else:
+					score = score + 1
+					if int(played.content) == target:
+						embed = discord.Embed(title="What's the number?", description=str(message.author)+" has finished a game", color=0x00ff00)
+						embed.add_field(name="Minimum", value=mini)
+						embed.add_field(name="Maximum", value=maxi)
+						embed.add_field(name="Score", value=score)
+						embed.add_field(name="Number to find", value=target)
+						await play.edit(content=None,tts=False,embed=embed)
+						await host.edit(content=None,tts=False,embed=embed)
+						ongoing = False
+						return
+					elif int(played.content) > target:
+						embed = discord.Embed(title="What's the number?", description=str(message.author)+" has started a game", color=0xffff00)
+						embed.add_field(name="Minimum", value=mini)
+						embed.add_field(name="Maximum", value=maxi)
+						embed.add_field(name="Score", value=score)
+						embed.add_field(name="Number to find", value="Less than "+str(played.content))
+						await play.edit(content=None,tts=False,embed=embed)
+					else: 
+						embed = discord.Embed(title="What's the number?", description=str(message.author)+" has started a game", color=0xffff00)
+						embed.add_field(name="Minimum", value=mini)
+						embed.add_field(name="Maximum", value=maxi)
+						embed.add_field(name="Score", value=score)
+						embed.add_field(name="Number to find", value="More than "+str(played.content))
+						await play.edit(content=None,tts=False,embed=embed)
+		else:
+			player = [message.author]
+			ready = [False]
+			for x in message.mentions:
+				player.append(x)
+				ready.append(False)
+			if len(player) > 22:
+				await message.channel.send(content="Too many player invited",tts=False,embed=None)
+			else:
+				embed = discord.Embed(title="What's the number?", description=str(message.author)+" is preparing a game", color=0x0000ff)
+				embed.add_field(name="Minimum", value=mini)
+				embed.add_field(name="Maximum", value=maxi)
+				for x in range(0,len(player)):
+					if ready[x] == False:
+						embed.add_field(name=str(player[x]), value="Not ready")
+					else:
+						embed.add_field(name=str(player[x]), value="Ready")
+				host = await message.channel.send(content=None,tts=False,embed=embed)
+				await host.add_reaction('✅')
+				def check(reaction, user):
+					return (user in player) and (str(reaction.emoji) == '✅') and (reaction.message.id == host.id)
+				while ready.count(True) != len(player):
+					try:
+						reaction, user = await client.wait_for('reaction_add', timeout=300.0, check=check)
+					except asyncio.TimeoutError:
+						embed = discord.Embed(title="What's the number?", description="A player didn't get ready", color=0xff0000)
+						embed.add_field(name="Minimum", value=mini)
+						embed.add_field(name="Maximum", value=maxi)
+						embed.add_field(name="Number to find", value=target)
+						for x in range(0,len(player)):
+							if ready[x] == False:
+								embed.add_field(name=str(player[x]), value="Not ready")
+							else:
+								embed.add_field(name=str(player[x]), value="Ready")
+						await host.edit(content=None,tts=False,embed=embed)
+						await host.clear_reaction('✅')
+						return
+					else:
+						for x in range(0, len(player)):
+							if player[x] == user:
+								ready[x] = True
+						embed = discord.Embed(title="What's the number?", description=str(message.author)+" is preparing a game", color=0x0000ff)
+						embed.add_field(name="Minimum", value=mini)
+						embed.add_field(name="Maximum", value=maxi)
+						for x in range(0,len(player)):
+							if ready[x] == False:
+								embed.add_field(name=str(player[x]), value="Not ready")
+							else:
+								embed.add_field(name=str(player[x]), value="Ready")
+						await host.edit(content=None,tts=False,embed=embed)
+				await host.clear_reaction('✅')
+				score = [0]
+				finish = [False]
+				afk = [False]
+				number = [-1]
+				for x in message.mentions:
+					score.append(0)
+					finish.append(False)
+					afk.append(False)
+					number.append(-1)
+				while (finish.count(True)+afk.count(True)) != len(player):
+					for x in range(0, len(player)):
+						if (finish[x] == False) and (afk[x] == False):
+							embed = discord.Embed(title="What's the number?", description="Game has started!", color=0xffff00)
+							embed.add_field(name="Minimum", value=mini)
+							embed.add_field(name="Maximum", value=maxi)
+							embed.add_field(name="Current turn", value=player[x])
+							await host.edit(content=None,tts=False,embed=embed)
+							embed = discord.Embed(title="What's the number?", description="It's your turn!", color=0xffff00)
+							embed.add_field(name="Minimum", value=mini)
+							embed.add_field(name="Maximum", value=maxi)
+							embed.add_field(name="Score", value=score[x])
+							if number[x] != -1:
+								if number[x] > target:
+									embed.add_field(name="Number to find", value="Less than "+str(number[x]))
+								else:
+									embed.add_field(name="Number to find", value="More than "+str(number[x]))
+							if player[x].dm_channel == None:
+								await player[x].create_dm()
+							await player[x].dm_channel.send(content=None,tts=False,embed=embed)
+							def check(m):
+								test = m.content
+								try:
+									int(test)
+								except ValueError:
+									test = -1
+								else:
+									test = int(test)
+								return (test >= mini) and (test <= maxi) and (m.channel.id == player[x].dm_channel.id)
+							try:
+								played = await client.wait_for('message', timeout=300, check=check)
+							except asyncio.TimeoutError:
+								afk[x] = True
+								await player[x].dm_channel.send(content="Looks like you went AFK!",tts=False,embed=None)
+								return
+							else:
+								score[x] = score[x] + 1
+								number[x] = int(played.content)
+								if number[x] == target:
+									finish[x] = True
+									await player[x].dm_channel.send(content="You nailed it!",tts=False,embed=None)
+								else:
+									await player[x].dm_channel.send(content="Ok!",tts=False,embed=None)
+				embed = discord.Embed(title="What's the number?", description="The game has ended", color=0x00ff00)
+				embed.add_field(name="Minimum", value=mini)
+				embed.add_field(name="Maximum", value=maxi)
+				embed.add_field(name="Number to find", value=target)
+				found_score = False
+				place = 1
+				place_str = "1st"
+				for score_cible in range(0,max(score)+1):
+					if found_score == True:
+						place = place + 1
+						buffer = str(place)
+						if buffer[len(buffer)-1:] == "1":
+							place_str = str(place)+"st"
+						elif buffer[len(buffer)-1:] == "2":
+							place_str = str(place)+"nd"
+						elif buffer[len(buffer)-1:] == "3":
+							place_str = str(place)+"rd"
+						else:
+							place_str = str(place)+"th"
+						found_score = False
+					for x in range(0,len(player)):
+						if score[x] == score_cible:
+							embed.add_field(name=str(place_str)+" ("+str(score[x])+")", value=str(player[x]))
+							found_score = True
+				for x in range(0,len(player)):
+					if afk[x] == True:
+						embed.add_field(name="DNF", value=str(player[x]))
+				await host.edit(content=None,tts=False,embed=embed)
+				await host.add_reaction('👏')
+				return
 
 # A quick script to open the file having the bot token, get the token and launch the bot with the token
 file = open("./settings/token.id", "r")
