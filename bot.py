@@ -307,7 +307,7 @@ async def on_message(message):
 				else:
 					await message.delete()
 					embed = discord.Embed(title="What's written?", description=str(message.author)+" has started a game", color=message.author.color)
-					embed.add_field(name="Language", value=lang, inline=False)
+					embed.add_field(name="Language", value=lang.capitalize(), inline=False)
 					embed.add_field(name="Time", value=str(time)+"s", inline=False)
 					embed.add_field(name="Encrypted sentences", value="`"+encrypted+"`",inline=False)
 					host = await message.channel.send(content=None,tts=False,embed=embed)
