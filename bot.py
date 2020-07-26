@@ -599,7 +599,6 @@ async def on_message(message):
 							except asyncio.TimeoutError:
 								afk[x] = True
 								await player[x].dm_channel.send(content="Looks like you went AFK!",tts=False,embed=None)
-								return
 							else:
 								score[x] = score[x] + 1
 								number[x] = int(played.content)
