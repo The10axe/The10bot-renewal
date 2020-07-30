@@ -8,6 +8,22 @@ client = discord.Client()
 # Change this to change the prefix of the bot:
 prefix = "/"
 
+try:
+	file = open("./settings/blacklist.id", "r")
+except FileNotFoundError:
+	temp = []
+	file = open("./settings/blacklist.id", "w")
+	file.writelines()
+	file.close()
+else:
+	file.close()
+file = open("./settings/blacklist.id", "r")
+blocked = file.readlines()
+file.close()
+for value in range(0,len(blocked)):
+	blocked[value] = blocked[value].rstrip('\n')
+print(blocked)
+
 # This will play when bot is ready:
 @client.event
 async def on_ready():
@@ -17,8 +33,10 @@ async def on_ready():
 # It will store every info about the message in the var "message"
 @client.event
 async def on_message(message):
-	# We prevent the bot from triggering its own commands
-	if message.author == client.user:
+	global blocked
+
+	# We prevent the bot from triggering its own commands, or triggering to message made by a blocked user
+	if (message.author == client.user) or (str(message.author.id) in blocked):
 		return
 	
 	# The command help, that makes an embed fields about everything possible with the bot
@@ -637,6 +655,46 @@ async def on_message(message):
 				await host.edit(content=None,tts=False,embed=embed)
 				await host.add_reaction('👏')
 				return
+
+	if message.content.startswith(prefix+'block'):
+		info = await client.application_info()
+		if info.owner == message.author:
+			if len(message.mentions) == 0: # Si on ne mentionne personne
+				traitement = message.content.split(" ")
+				if len(traitement) == 2:
+					if str(traitement[1]) in blocked:
+						blocked.remove(str(traitement[1]))
+						file = open("./settings/blacklist.id", "w")
+						for value in blocked:
+							file.write(value+"\n")
+						file.close()
+						await message.channel.send("ID: "+str(traitement[1])+" unblocked successfully!")
+					else:
+						seek = client.get_user(int(traitement[1]))
+						if seek != None:
+							blocked.append(str(traitement[1]))
+							file = open("./settings/blacklist.id", "w")
+							for value in blocked:
+								file.write(value+"\n")
+							file.close()
+							await message.channel.send("ID: "+str(traitement[1])+" blocked successfully!")
+			else:
+				if str(message.mentions[0].id) in blocked:
+						blocked.remove(str(message.mentions[0].id))
+						file = open("./settings/blacklist.id", "w")
+						for value in blocked:
+							file.write(value+"\n")
+						file.close()
+						await message.channel.send("ID: "+str(message.mentions[0].id)+" unblocked successfully!")
+				else:
+					blocked.append(str(message.mentions[0].id))
+					file = open("./settings/blacklist.id", "w")
+					for value in blocked:
+						file.write(value+"\n")
+					file.close()
+					await message.channel.send("ID: "+str(message.mentions[0].id)+" blocked successfully!")
+					
+
 
 # A quick script to open the file having the bot token, get the token and launch the bot with the token
 file = open("./settings/token.id", "r")
