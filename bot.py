@@ -3,6 +3,7 @@ import discord
 import datetime
 import asyncio
 import random
+import urllib.request
 
 client = discord.Client()
 # Change this to change the prefix of the bot:
@@ -13,7 +14,7 @@ try:
 except FileNotFoundError:
 	temp = []
 	file = open("./settings/blacklist.id", "w")
-	file.writelines()
+	file.writelines(temp)
 	file.close()
 else:
 	file.close()
@@ -23,6 +24,28 @@ file.close()
 for value in range(0,len(blocked)):
 	blocked[value] = blocked[value].rstrip('\n')
 print(blocked)
+
+allowed = None
+try:
+	file = open("./command/ip.id", "r")
+except FileNotFoundError:
+	allowed = []
+	file = open("./command/ip.id", "w")
+	file.writelines(allowed)
+	file.close()
+else:
+	file.close()
+file = open("./command/ip.id", "r")
+allowed = file.readlines()
+file.close()
+for value in range(0,len(allowed)):
+	allowed[value] = allowed[value].rstrip('\n')
+
+morse = ["·-","-···","-·-·", "-··","·","··-·","--·","····","··","·---","-·-","·-··","--","-·","---","·--·","--·-","·-·","···","-","··-","···-","·--","-··-","-·--","--··","·----","··---","···--","····-","·····","-····","--···","---··","----·","-----","   "]
+lettre = ["A", "B", "C", "D", "E", "F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","1","2","3","4","5","6","7","8","9","0"," "]
+binary = ["01000001","01000010","01000011","01000100","01000101","01000110","01000111","01001000","01001001","01001010","01001011","01001100","01001101","01001110","01001111","01010000","01010001","01010010","01010011","01010100","01010101","01010110","01010111","01011000","01011001","01011010","00110001","00110010","00110011","00110100","00110101","00110110","00110111","00111000","00111001","00110000","00100000"]
+hexa=["41","42","43","44","45","46","47","48","49","4A","4B","4C","4D","4E","4F","50","51","52","53","54","55","56","57","58","59","5A","31","32","33","34","35","36","37","38","39","30","20"]
+octal=["101","102","103","104","105","106","107","110","111","112","113","114","115","116","117","120","121","122","123","124","125","126","127","130","131","132","061","062","063","064","065","066","067","070","071","060","040"]
 
 # This will play when bot is ready:
 @client.event
@@ -34,6 +57,7 @@ async def on_ready():
 @client.event
 async def on_message(message):
 	global blocked
+	global allowed
 
 	# We prevent the bot from triggering its own commands, or triggering to message made by a blocked user
 	if (message.author == client.user) or (str(message.author.id) in blocked):
@@ -43,24 +67,42 @@ async def on_message(message):
 	if message.content.startswith(prefix+'help'):
 		print("/help done by "+str(message.author)+"("+str(message.author.id)+") at "+str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 		info = await client.application_info()
+		traitement = message.content.split(" ")
+		page = 1
+		if len(traitement) == 1:
+			page = 1
+		elif str(int(traitement[1])) == traitement[1]:
+			page = int(traitement[1])
+		if page < 1:
+			page = 1
+		elif page > 2:
+			page = 2
 		async with message.channel.typing():
 			if info.owner == message.author:
-				embed = discord.Embed(title="Help Page", description="For Owner and for Dummies", color=message.author.color)
+				embed = discord.Embed(title="Help Page "+str(page), description="For Owner and for Dummies", color=message.author.color)
 			else:
-				embed = discord.Embed(title="Help Page", description="For Users and for Dummies", color=message.author.color)
+				embed = discord.Embed(title="Help Page "+str(page), description="For Users and for Dummies", color=message.author.color)
 			embed.add_field(name="Tooltips:", value="[something] = Optional, <something> = required", inline=False)
-			embed.add_field(name="/help", value="This is what you just did!")
-			embed.add_field(name="/time", value="Gives you the Bot's time.")
-			embed.add_field(name="/info [user]", value="Gives you info about a user, if no user is given, gives info about you")
-			embed.add_field(name="/rps <user>", value="Challenge another user to Rock Paper Scissors")
-			embed.add_field(name="/ping", value="Gives the latency of the bot to Discord")
-			embed.add_field(name="/bot", value="Gives information about the bot!")
-			embed.add_field(name="/seek <ID>", value="Gives you info about a user, using their ID")
-			embed.add_field(name="/sncf", value="The satanic invocation of a french train")
-			embed.add_field(name="/wtn [-min:<value>] [-max:<value>] [-force:<true|false>] [-ttj:<value>] [-ttp:<value>] [user]", value="Begin a \"What's the number\" game, forcing will put all non ready player AFK, ttj is Time To Join, ttp is Time To Play")
-			embed.add_field(name="/crypto [-lang:<morse|binary|hexadecimal|octal>] [-time:<seconds>] [-force:<true|false>] [sentences]", value="Starts a game where you need to guess what's written in a language, if nothing is given, a convertion table will be displayed, if only a sentences is given, the game start with default rules which is 300s (5 minutes) and a random language.", inline=False)
-			if info.owner == message.author:
-				embed.add_field(name="/stop", value="Stop the bot!")
+			if page == 1:
+				embed.add_field(name="/help [page]", value="This is what you just did!")
+				embed.add_field(name="/time", value="Gives you the Bot's time.")
+				embed.add_field(name="/info [user]", value="Gives you info about a user, if no user is given, gives info about you")
+				embed.add_field(name="/rps <user>", value="Challenge another user to Rock Paper Scissors")
+				embed.add_field(name="/ping", value="Gives the latency of the bot to Discord")
+				embed.add_field(name="/bot", value="Gives information about the bot!")
+				embed.add_field(name="/seek <ID>", value="Gives you info about a user, using their ID")
+				embed.add_field(name="/sncf", value="The satanic invocation of a french train")
+				embed.add_field(name="/wtn [-min:<value>] [-max:<value>] [-force:<true|false>] [-ttj:<value>] [-ttp:<value>] [user]", value="Begin a \"What's the number\" game, forcing will put all non ready player AFK, ttj is Time To Join, ttp is Time To Play")
+				embed.add_field(name="/crypto [-lang:<morse|binary|hexadecimal|octal>] [-time:<seconds>] [-force:<true|false>] [sentences]", value="Starts a game where you need to guess what's written in a language, if nothing is given, a convertion table will be displayed, if only a sentences is given, the game start with default rules which is 300s (5 minutes) and a random language.", inline=False)
+				if info.owner == message.author:
+					embed.add_field(name="/stop", value="Stop the bot!")
+					embed.add_field(name="/block <ID or user>", value="Blocks the user from using my commands!")
+			elif page == 2:
+				if (str(message.channel.id) in allowed) and (info.owner != message.author):
+					embed.add_field(name="/mc", value="Show's the Minecraft's server IP")
+				elif info.owner == message.author:
+					embed.add_field(name="/mc [-toggle]", value="Show's the Minecraft's server IP")
+				embed.add_field(name="/ttt <user>", value="Start a Tic-Tac-Toe game against someone")
 			embed.set_footer(text=str(message.author), icon_url=message.author.avatar_url)
 			await message.channel.send(content=None,tts=False,embed=embed)
 		return
@@ -206,14 +248,15 @@ async def on_message(message):
 			embed = discord.Embed(title="The10bot", description="An open source bot coded in Python", url="https://discord.com/api/oauth2/authorize?client_id=426478004298842113&permissions=8&redirect_uri=https%3A%2F%2Fdiscord.com&scope=bot")
 			embed.add_field(name="Source Code",value=str('[Available on Github](https://github.com/The10axe/The10bot-renewal)'), inline=False)
 			embed.add_field(name="Current version", value="Stable")
-			embed.add_field(name="Last Update", value="26/07/2020 - 11:30", inline=False)
+			embed.add_field(name="Last Update", value="19/08/2020 - 11:30", inline=False)
+			embed.add_field(name="Currently watching", value=str(len(client.guilds))+" servers", inline=False)
 			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 			info = await client.application_info()
 			embed.set_author(name="The10axe", url="https://github.com/The10axe", icon_url=info.owner.avatar_url)
 			await message.channel.send(content=None,tts=False,embed=embed)
 		return
 
-	# Get a user's info with ID
+	# Get a user's info with ID&
 	if message.content.startswith(prefix+'seek'):
 		print("/seek done by "+str(message.author)+"("+str(message.author.id)+") at "+str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 		async with message.channel.typing():
@@ -232,11 +275,11 @@ async def on_message(message):
 	# A game about encrypted messages
 	if message.content.startswith(prefix+'crypto'):
 		print("/crypto done by "+str(message.author)+"("+str(message.author.id)+") at "+str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
-		morse = ["·-","-···","-·-·", "-··","·","··-·","--·","····","··","·---","-·-","·-··","--","-·","---","·--·","--·-","·-·","···","-","··-","···-","·--","-··-","-·--","--··","·----","··---","···--","····-","·····","-····","--···","---··","----·","-----","   "]
-		lettre = ["A", "B", "C", "D", "E", "F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","1","2","3","4","5","6","7","8","9","0"," "]
-		binary = ["01000001","01000010","01000011","01000100","01000101","01000110","01000111","01001000","01001001","01001010","01001011","01001100","01001101","01001110","01001111","01010000","01010001","01010010","01010011","01010100","01010101","01010110","01010111","01011000","01011001","01011010","00110001","00110010","00110011","00110100","00110101","00110110","00110111","00111000","00111001","00110000","00100000"]
-		hexa=["41","42","43","44","45","46","47","48","49","4A","4B","4C","4D","4E","4F","50","51","52","53","54","55","56","57","58","59","5A","31","32","33","34","35","36","37","38","39","30","20"]
-		octal=["101","102","103","104","105","106","107","110","111","112","113","114","115","116","117","120","121","122","123","124","125","126","127","130","131","132","061","062","063","064","065","066","067","070","071","060","040"]
+		global morse
+		global lettre
+		global binary
+		global hexa
+		global octal
 		traitement = message.content.split(" ")
 		if len(traitement) == 1:
 			embed = discord.Embed(title="Converting table for "+str(message.author), description="Part 1", color=message.author.color)
@@ -656,6 +699,7 @@ async def on_message(message):
 				await host.add_reaction('👏')
 				return
 
+	# A command made to block someone for executing a bot's command, only the bot owner can block someone.
 	if message.content.startswith(prefix+'block'):
 		info = await client.application_info()
 		if info.owner == message.author:
@@ -693,8 +737,154 @@ async def on_message(message):
 						file.write(value+"\n")
 					file.close()
 					await message.channel.send("ID: "+str(message.mentions[0].id)+" blocked successfully!")
-					
+	
+	# A command to show the IP of the Raspberry Pi hosting a Minecraft Server, this command cannot be executed outside of allowed channel.
+	if message.content.startswith(prefix+'mc'):
+		info = await client.application_info()
+		traitement = message.content.split(" ")
+		if len(traitement) == 1:
+			if str(message.channel.id) in allowed:
+				ip = urllib.request.urlopen('https://api.ipify.org').read().decode('utf8')
+				await message.channel.send(content=ip+":25565",tts=False,embed=None)
+		else:
+			if message.author == info.owner:
+				for x in range(1,len(traitement)):
+					if traitement[x].startswith("-"):
+						if traitement[x].startswith("-toggle"):
+							if str(message.channel.id) in allowed:
+								allowed.remove(str(message.channel.id))
+								await message.channel.send(content="/mc disallowed in this channel",tts=False,embed=None)
+							else:
+								allowed.append(str(message.channel.id))
+								await message.channel.send(content="/mc allowed in this channel",tts=False,embed=None)
+							file = open("./command/ip.id", "w")
+							for value in allowed:
+								file.write(value+"\n")
+							file.close()
 
+	# A simple tic tac toe game
+	if message.content.startswith(prefix+'ttt'):
+		print("/ttt done by "+str(message.author)+"("+str(message.author.id)+") at "+str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+		if len(message.mentions) == 0:
+			await message.channel.send("Please ping a player to play against.")
+			return
+		else:
+			player = [message.author,message.mentions[0]]
+			embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" VS "+str(player[1]), color=0xff0000)
+			embed.add_field(name="Status",value="Waiting for "+str(player[1])+" to be ready (You have 5 minutes)",inline=False)
+			host = await message.channel.send(content=None,tts=False,embed=embed)
+			await host.add_reaction('✅')
+			def check(reaction, user):
+				return (user == player[1]) and (str(reaction.emoji) == '✅') and (reaction.message.id == host.id)
+			try:
+				reaction, user = await client.wait_for('reaction_add', timeout=300.0, check=check)
+			except asyncio.TimeoutError:
+				embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" VS "+str(player[1]), color=0xff0000)
+				embed.add_field(name="Status",value="Battle Canceled",inline=False)
+				await host.edit(content=None,tts=False,embed=embed)
+				await host.clear_reaction('✅')
+			else:
+				await host.clear_reaction('✅')
+				turn = random.randint(0,1)
+				grille = [-1,-1,-1,-1,-1,-1,-1,-1,-1]
+				hud = [":regional_indicator_a:", ":regional_indicator_b:", ":regional_indicator_c:", ":regional_indicator_d:", ":regional_indicator_e:", ":regional_indicator_f:", ":regional_indicator_g:", ":regional_indicator_h:", ":regional_indicator_i:"]
+				embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" :regional_indicator_o: VS :regional_indicator_x: "+str(player[1]), color=0xffff00)
+				display = []
+				for x in range(0,len(grille)):
+					if grille[x] == -1:
+						display.append(hud[x])
+				embed.add_field(name="Grid",value=display[0]+display[1]+display[2]+"\n"+display[3]+display[4]+display[5]+"\n"+display[6]+display[7]+display[8])
+				await host.edit(content=None,tts=False,embed=embed)
+				# Jeu
+				default = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮"]
+				react = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮"]
+				while True:
+					action = ""
+					embed.add_field(name="Current turn",value=str(player[turn]),inline=False)
+					await host.edit(content=None,tts=False,embed=embed)
+					if player[turn].dm_channel == None:
+						await player[turn].create_dm()
+					play = await player[turn].dm_channel.send(content="It's your turn to play! You have 5 minutes!", embed=embed)
+					for x in react:
+						await play.add_reaction(x)
+					def checkPlay(reaction, user):
+						nonlocal action
+						nonlocal turn
+						action = str(reaction.emoji)
+						return (user == player[turn]) and (str(reaction.emoji) in react) and (reaction.message.id == play.id)
+					try:
+						reaction, user = await client.wait_for('reaction_add', timeout=300.0, check=checkPlay)
+					except asyncio.TimeoutError:
+						embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" :regional_indicator_o: VS :regional_indicator_x: "+str(player[1]), color=0xff0000)
+						embed.add_field(name="Status",value=str(player[turn])+" failed to play in time",inline=False)
+						await host.edit(content=None,tts=False,embed=embed)
+						return
+					else:
+						for x in range(0,9):
+							if action == default[x]:
+								grille[x] = turn
+						react.remove(action)
+						winner = -1
+						if (((grille[0] == grille[1]) and (grille[1] == grille[2])) or ((grille[0] == grille[3]) and (grille[3] == grille[6])) or ((grille[0] == grille[4]) and (grille[4] == grille[8]))) and (grille[0] != -1):
+							winner = 0
+						elif ((grille[3] == grille[4]) and (grille[4] == grille[5])) and (grille[3] != -1):
+							winner = 3
+						elif (((grille[6] == grille[7]) and (grille[7] == grille[8])) or ((grille[6] == grille[4]) and (grille[4] == grille[2]))) and (grille[6] != -1):
+							winner = 6
+						elif (grille[1] == grille[4]) and (grille[4] == grille[7]) and (grille[1] != -1):
+							winner = 1
+						elif (grille[2] == grille[5]) and (grille[5] == grille[8]) and (grille[2] != -1):
+							winner = 2
+						if winner != -1:
+							print("Partie de morpion")
+							print(winner)
+							print(grille)
+							embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" :regional_indicator_o: VS :regional_indicator_x: "+str(player[1]), color=0x00ff00)
+							display = []
+							for x in range(0,len(grille)):
+								if grille[x] == -1:
+									display.append(hud[x])
+								elif grille[x] == 0:
+									display.append(":regional_indicator_o:")
+								else:
+									display.append(":regional_indicator_x:")
+							embed.add_field(name="Grid",value=display[0]+display[1]+display[2]+"\n"+display[3]+display[4]+display[5]+"\n"+display[6]+display[7]+display[8])
+							embed.add_field(name="Winner", value=str(player[turn]))
+							await host.edit(content=None,tts=False,embed=embed)
+							await player[0].dm_channel.send(content=None, embed=embed)
+							await player[1].dm_channel.send(content=None, embed=embed)
+							return
+						elif -1 in grille:
+							embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" :regional_indicator_o: VS :regional_indicator_x: "+str(player[1]), color=0xffff00)
+							display = []
+							for x in range(0,len(grille)):
+								if grille[x] == -1:
+									display.append(hud[x])
+								elif grille[x] == 0:
+									display.append(":regional_indicator_o:")
+								else:
+									display.append(":regional_indicator_x:")
+							embed.add_field(name="Grid",value=display[0]+display[1]+display[2]+"\n"+display[3]+display[4]+display[5]+"\n"+display[6]+display[7]+display[8])
+							if turn == 0:
+								turn = 1
+							else:
+								turn = 0
+						else:
+							embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" :regional_indicator_o: VS :regional_indicator_x: "+str(player[1]), color=0x00ffff)
+							display = []
+							for x in range(0,len(grille)):
+								if grille[x] == -1:
+									display.append(hud[x])
+								elif grille[x] == 0:
+									display.append(":regional_indicator_o:")
+								else:
+									display.append(":regional_indicator_x:")
+							embed.add_field(name="Grid",value=display[0]+display[1]+display[2]+"\n"+display[3]+display[4]+display[5]+"\n"+display[6]+display[7]+display[8])
+							embed.add_field(name="Winner", value="Nobody")
+							await host.edit(content=None,tts=False,embed=embed)
+							await player[0].dm_channel.send(content=None, embed=embed)
+							await player[1].dm_channel.send(content=None, embed=embed)
+							return
 
 # A quick script to open the file having the bot token, get the token and launch the bot with the token
 file = open("./settings/token.id", "r")
