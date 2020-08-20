@@ -9,6 +9,7 @@ client = discord.Client()
 # Change this to change the prefix of the bot:
 prefix = "/"
 
+# Loading every global vars
 try:
 	file = open("./settings/blacklist.id", "r")
 except FileNotFoundError:
@@ -47,10 +48,20 @@ binary = ["01000001","01000010","01000011","01000100","01000101","01000110","010
 hexa=["41","42","43","44","45","46","47","48","49","4A","4B","4C","4D","4E","4F","50","51","52","53","54","55","56","57","58","59","5A","31","32","33","34","35","36","37","38","39","30","20"]
 octal=["101","102","103","104","105","106","107","110","111","112","113","114","115","116","117","120","121","122","123","124","125","126","127","130","131","132","061","062","063","064","065","066","067","070","071","060","040"]
 
-# This will play when bot is ready:
+# This will execute when bot is ready:
 @client.event
 async def on_ready():
     print('Logged in as '+ str(client.user))
+
+# This will execute whenever the bot enters a server.
+@client.event
+async def on_guild_join(guild):
+	if guild.system_channel != None:
+		info = await client.application_info()
+		embed = discord.Embed(title="Welcome to me!", description="Thanks for adding me to your server and so trusting me!", color=0xffffff)
+		embed.add_field(name="How to use me?", value="/help", inline=False)
+		embed.add_field(name="Owner of the bot", value=str(info.owner), inline=False)
+		await guild.system_channel.send(content=None,tts=False,embed=embed)
 
 # This will trigger when bot see a message.
 # It will store every info about the message in the var "message"
@@ -248,7 +259,7 @@ async def on_message(message):
 			embed = discord.Embed(title="The10bot", description="An open source bot coded in Python", url="https://discord.com/api/oauth2/authorize?client_id=426478004298842113&permissions=8&redirect_uri=https%3A%2F%2Fdiscord.com&scope=bot")
 			embed.add_field(name="Source Code",value=str('[Available on Github](https://github.com/The10axe/The10bot-renewal)'), inline=False)
 			embed.add_field(name="Current version", value="Stable")
-			embed.add_field(name="Last Update", value="19/08/2020 - 11:30", inline=False)
+			embed.add_field(name="Last Update", value="19/08/2020 - 13:20", inline=False)
 			embed.add_field(name="Currently watching", value=str(len(client.guilds))+" servers", inline=False)
 			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 			info = await client.application_info()
