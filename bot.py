@@ -259,8 +259,9 @@ async def on_message(message):
 		async with message.channel.typing():
 			embed = discord.Embed(title="The10bot", description="An open source bot coded in Python", url="https://discord.com/api/oauth2/authorize?client_id=426478004298842113&permissions=8&redirect_uri=https%3A%2F%2Fdiscord.com&scope=bot")
 			embed.add_field(name="Source Code",value=str('[Available on Github](https://github.com/The10axe/The10bot-renewal)'), inline=False)
+			embed.add_field(name="Official Server", value=str('[Discord Invite](https://discord.gg/YHy8fVV)'), inline=False)
 			embed.add_field(name="Current version", value="Stable")
-			embed.add_field(name="Last Update", value="28/08/2020 - 13:05", inline=False)
+			embed.add_field(name="Last Update", value="28/08/2020 - 13:20", inline=False)
 			embed.add_field(name="Currently watching", value=str(len(client.guilds))+" servers", inline=False)
 			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 			info = await client.application_info()
