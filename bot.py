@@ -114,6 +114,7 @@ async def on_message(message):
 				elif info.owner == message.author:
 					embed.add_field(name="/mc [-toggle]", value="Show's the Minecraft's server IP")
 				embed.add_field(name="/ttt <user>", value="Start a Tic-Tac-Toe game against someone")
+				embed.add_field(name="/server", value="Gives info about the server you trigger the command in!")
 			embed.set_footer(text=str(message.author), icon_url=message.author.avatar_url)
 			await message.channel.send(content=None,tts=False,embed=embed)
 		return
@@ -259,7 +260,7 @@ async def on_message(message):
 			embed = discord.Embed(title="The10bot", description="An open source bot coded in Python", url="https://discord.com/api/oauth2/authorize?client_id=426478004298842113&permissions=8&redirect_uri=https%3A%2F%2Fdiscord.com&scope=bot")
 			embed.add_field(name="Source Code",value=str('[Available on Github](https://github.com/The10axe/The10bot-renewal)'), inline=False)
 			embed.add_field(name="Current version", value="Stable")
-			embed.add_field(name="Last Update", value="19/08/2020 - 13:20", inline=False)
+			embed.add_field(name="Last Update", value="28/08/2020 - 13:05", inline=False)
 			embed.add_field(name="Currently watching", value=str(len(client.guilds))+" servers", inline=False)
 			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 			info = await client.application_info()
@@ -896,6 +897,26 @@ async def on_message(message):
 							await player[0].dm_channel.send(content=None, embed=embed)
 							await player[1].dm_channel.send(content=None, embed=embed)
 							return
+
+	# Gives info about a server
+	if message.content.startswith(prefix+'server'):
+		print("/server done by "+str(message.author)+"("+str(message.author.id)+") at "+str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+		try:
+			embed = discord.Embed(title="Info about "+str(message.channel.guild.name), description=None, color=message.author.color)
+			embed.set_thumbnail(url=message.channel.guild.icon_url)
+			embed.add_field(name="ID:", value=str(message.channel.guild.id), inline=False)
+			embed.add_field(name="Owner:", value=str(message.channel.guild.owner)+" ("+str(message.channel.guild.owner.id)+")", inline=False)
+			embed.add_field(name="Created:", value=str(message.channel.guild.created_at)[:-3], inline=False)
+			embed.add_field(name="Members:", value=str(message.channel.guild.member_count))
+			embed.add_field(name="Boost:", value=str(message.channel.guild.premium_subscription_count))
+			if message.channel.guild.banner != None:
+				embed.set_image(url=message.channel.guild.banner_url)
+			await message.channel.send(content=None,tts=False,embed=embed)
+		except AttributeError:
+			await message.channel.send(content="You must be in a server to execute that command",tts=False,embed=None)
+			return
+		else:
+			return
 
 # A quick script to open the file having the bot token, get the token and launch the bot with the token
 file = open("./settings/token.id", "r")
