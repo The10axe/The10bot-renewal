@@ -5,6 +5,9 @@ import asyncio
 import random
 import urllib.request
 
+startup = datetime.datetime.now()
+last_logged = "None"
+
 client = discord.Client()
 # Change this to change the prefix of the bot:
 prefix = "/"
@@ -51,7 +54,9 @@ octal=["101","102","103","104","105","106","107","110","111","112","113","114","
 # This will execute when bot is ready:
 @client.event
 async def on_ready():
-    print('Logged in as '+ str(client.user))
+	print('Logged in as '+ str(client.user))
+	global last_logged
+	last_logged = datetime.datetime.now()
 
 # This will execute whenever the bot enters a server.
 @client.event
@@ -189,6 +194,7 @@ async def on_message(message):
 				player = [message.author,message.mentions[0]]
 				embed = discord.Embed(title="Rock Paper Scissors", description=str(player[0])+" VS "+str(player[1]), color=0xff0000)
 				embed.add_field(name="Status",value="Waiting for "+str(player[1])+" to be ready (You have 5 minutes)",inline=False)
+				embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 				host = await message.channel.send(content=None,tts=False,embed=embed)
 				await host.add_reaction('✅')
 				def check(reaction, user):
@@ -198,6 +204,7 @@ async def on_message(message):
 				except asyncio.TimeoutError:
 					embed = discord.Embed(title="Rock Paper Scissors", description=str(player[0])+" VS "+str(player[1]), color=0xff0000)
 					embed.add_field(name="Status",value="Battle Canceled",inline=False)
+					embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 					await host.edit(content=None,tts=False,embed=embed)
 					await host.clear_reaction('✅')
 				else:
@@ -208,6 +215,7 @@ async def on_message(message):
 					for u in player:
 						embed = discord.Embed(title="Rock Paper Scissors", description=str(player[0])+" VS "+str(player[1]), color=0xffff00)
 						embed.add_field(name="Status",value=str(u)+" is playing",inline=False)
+						embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 						await host.edit(content=None,tts=False,embed=embed)
 						if u.dm_channel == None:
 							await u.create_dm()
@@ -224,6 +232,7 @@ async def on_message(message):
 						except asyncio.TimeoutError:
 							embed = discord.Embed(title="Rock Paper Scissors", description=str(player[0])+" VS "+str(player[1]), color=0xff0000)
 							embed.add_field(name="Status",value=str(u)+" failed to play in time",inline=False)
+							embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 							await host.edit(content=None,tts=False,embed=embed)
 							return
 						else:
@@ -239,6 +248,7 @@ async def on_message(message):
 						status = str(player[1])+" won!"
 					embed.add_field(name="Status",value=status,inline=False)
 					embed.add_field(name="Playback",value=action[0]+" VS "+action[1],inline=False)
+					embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 					await host.edit(content=None,tts=False,embed=embed)
 					await host.add_reaction('👏')
 		return
@@ -246,9 +256,16 @@ async def on_message(message):
 	# Gives the bot's delay to Discord's server
 	if message.content.startswith(prefix+'ping'):
 		print("/ping done by "+str(message.author)+"("+str(message.author.id)+") at "+str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+		global last_logged
+		global startup
 		async with message.channel.typing():
 			embed = discord.Embed(title="I saw chu!", description="Chu forgot to say \"Pong!\".", color=0x00ff00)
 			embed.add_field(name="Ping:",value=str(round(client.latency,4)*1000)+"ms",inline=False)
+			embed.add_field(name="Command time:", value=str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+			embed.add_field(name="Start time:", value=str(startup.strftime("%d/%m/%Y %H:%M:%S")))
+			embed.add_field(name="Logged in time:", value=str(last_logged.strftime("%d/%m/%Y %H:%M:%S")))
+			embed.add_field(name="Global Uptime:", value=str(datetime.datetime.now()-startup))
+			embed.add_field(name="Last Uptime:", value=str(datetime.datetime.now()-last_logged))
 			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 			await message.channel.send(content=None,tts=False,embed=embed)
 		return
@@ -261,7 +278,7 @@ async def on_message(message):
 			embed.add_field(name="Source Code",value=str('[Available on Github](https://github.com/The10axe/The10bot-renewal)'), inline=False)
 			embed.add_field(name="Official Server", value=str('[Discord Invite](https://discord.gg/YHy8fVV)'), inline=False)
 			embed.add_field(name="Current version", value="Stable")
-			embed.add_field(name="Last Update", value="28/08/2020 - 13:20", inline=False)
+			embed.add_field(name="Last Update", value="29/08/2020 - 13:05", inline=False)
 			embed.add_field(name="Currently watching", value=str(len(client.guilds))+" servers", inline=False)
 			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 			info = await client.application_info()
@@ -281,7 +298,7 @@ async def on_message(message):
 				embed.set_thumbnail(url=seek.avatar_url)
 				embed.add_field(name="ID:", value=str(seek.id), inline=False)
 				embed.add_field(name="Came in Discord:", value=str(seek.created_at)[:-3], inline=False)
-				# embed.add_field(name="Activities:", value=str(message.author.activities))
+				embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 				await message.channel.send(content=None,tts=False,embed=embed)
 		return
 	
@@ -299,10 +316,12 @@ async def on_message(message):
 			embed.add_field(name="Allowed character",value="Binary | Octal | Hexadecimal\nMorse", inline=False)
 			for x in range(0,24):
 				embed.add_field(name=("`"+lettre[x]+"`"),value=("`"+str(binary[x])+" | "+str(octal[x])+" | "+str(hexa[x])+"`\n`"+str(morse[x])+"`"))
+			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 			await message.channel.send(content=None,tts=False,embed=embed)
 			embed = discord.Embed(title="Converting table for "+str(message.author), description="Part 2", color=message.author.color)
 			for x in range(24,len(lettre)):
 				embed.add_field(name=("`"+lettre[x]+"`"),value=("`"+str(binary[x])+" | "+str(octal[x])+" | "+str(hexa[x])+"`\n`"+str(morse[x])+"`"))
+			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 			await message.channel.send(content=None,tts=False,embed=embed)
 		else:
 			await message.delete()
@@ -387,6 +406,7 @@ async def on_message(message):
 						embed.add_field(name="Error", value=str(error), inline=False)
 						embed.add_field(name="Encrypted sentences", value="`"+encrypted+"`",inline=False)
 						embed.add_field(name="Sentences", value="`"+original+"`",inline=False)
+						embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 						await message.channel.send(content=None,tts=False,embed=embed)
 						return
 				else:
@@ -394,6 +414,7 @@ async def on_message(message):
 					embed.add_field(name="Language", value=lang.capitalize(), inline=False)
 					embed.add_field(name="Time", value=str(time)+"s", inline=False)
 					embed.add_field(name="Encrypted sentences", value="`"+encrypted+"`",inline=False)
+					embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 					host = await message.channel.send(content=None,tts=False,embed=embed)
 					def check(m):
 						return m.content.upper() == sentence and m.channel == message.channel
@@ -406,6 +427,7 @@ async def on_message(message):
 						embed.add_field(name="Encrypted sentences", value="`"+encrypted+"`",inline=False)
 						embed.add_field(name="Sentences", value="`"+original+"`",inline=False)
 						embed.add_field(name="Winner", value=str(client.user), inline=False)
+						embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 						await host.edit(content=None,tts=False,embed=embed)
 						return
 					else:
@@ -415,6 +437,7 @@ async def on_message(message):
 						embed.add_field(name="Encrypted sentences", value="`"+encrypted+"`",inline=False)
 						embed.add_field(name="Sentences", value="`"+original+"`",inline=False)
 						embed.add_field(name="Winner", value=str(winner.author), inline=False)
+						embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 						await host.edit(content=None,tts=False,embed=embed)
 						return
 			else:
@@ -449,6 +472,7 @@ async def on_message(message):
 				messagea = "The TER train n°"+str(random.randint(1000,999999))+" is "+heure+" and "+minute+" late!"
 			embed = discord.Embed(title="SNCF", description=messagea,color=0x000000)
 			embed.set_thumbnail(url="https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Logo_TER.svg/1920px-Logo_TER.svg.png")
+			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 			await message.channel.send(content=None,tts=False,embed=embed)
 		elif message.author.voice.channel == None:
 			minutes = random.randint(5,360)
@@ -470,6 +494,7 @@ async def on_message(message):
 				messagea = "The TER train n°"+str(random.randint(1000,999999))+" is "+heure+" and "+minute+" late!"
 			embed = discord.Embed(title="SNCF", description=messagea,color=0x000000)
 			embed.set_thumbnail(url="https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Logo_TER.svg/1920px-Logo_TER.svg.png")
+			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 			await message.channel.send(content=None,tts=False,embed=embed)
 	
 	# Number guessing game
@@ -518,6 +543,7 @@ async def on_message(message):
 			embed = discord.Embed(title="What's the number?", description=str(message.author)+" has started a game", color=0xffff00)
 			embed.add_field(name="Minimum", value=mini)
 			embed.add_field(name="Maximum", value=maxi)
+			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 			host = await message.channel.send(content=None,tts=False,embed=embed)
 			score = 0
 			if message.author.dm_channel == None:
@@ -542,6 +568,7 @@ async def on_message(message):
 					embed.add_field(name="Maximum", value=maxi)
 					embed.add_field(name="Score", value="Cancelled")
 					embed.add_field(name="Number to find", value=target)
+					embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 					await host.edit(content=None,tts=False,embed=embed)
 					ongoing = False
 					return
@@ -554,6 +581,7 @@ async def on_message(message):
 						embed.add_field(name="Score", value=score)
 						embed.add_field(name="Number to find", value=target)
 						await play.edit(content=None,tts=False,embed=embed)
+						embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 						await host.edit(content=None,tts=False,embed=embed)
 						ongoing = False
 						return
@@ -590,6 +618,7 @@ async def on_message(message):
 						embed.add_field(name=str(player[x]), value="Not ready")
 					else:
 						embed.add_field(name=str(player[x]), value="Ready")
+				embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 				host = await message.channel.send(content=None,tts=False,embed=embed)
 				await host.add_reaction('✅')
 				def check(reaction, user):
@@ -608,6 +637,7 @@ async def on_message(message):
 									embed.add_field(name=str(player[x]), value="Not ready")
 								else:
 									embed.add_field(name=str(player[x]), value="Ready")
+							embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 							await host.edit(content=None,tts=False,embed=embed)
 							await host.clear_reaction('✅')
 							return
@@ -627,6 +657,7 @@ async def on_message(message):
 								embed.add_field(name=str(player[x]), value="Not ready")
 							else:
 								embed.add_field(name=str(player[x]), value="Ready")
+						embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 						await host.edit(content=None,tts=False,embed=embed)
 				await host.clear_reaction('✅')
 				score = [0]
@@ -646,6 +677,7 @@ async def on_message(message):
 							embed.add_field(name="Player that finished", value=str(finish.count(True)))
 							embed.add_field(name="Player that went AFK", value=str(afk.count(True)))
 							embed.add_field(name="Player that haven't guessed", value=str(len(player)-(afk.count(True)+finish.count(True))))
+							embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 							await host.edit(content=None,tts=False,embed=embed)
 							embed = discord.Embed(title="What's the number?", description="It's your turn!", color=0xffff00)
 							embed.add_field(name="Minimum", value=mini)
@@ -708,6 +740,7 @@ async def on_message(message):
 				for x in range(0,len(player)):
 					if afk[x] == True:
 						embed.add_field(name="DNF", value=str(player[x]))
+				embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 				await host.edit(content=None,tts=False,embed=embed)
 				await host.add_reaction('👏')
 				return
@@ -785,6 +818,7 @@ async def on_message(message):
 			player = [message.author,message.mentions[0]]
 			embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" VS "+str(player[1]), color=0xff0000)
 			embed.add_field(name="Status",value="Waiting for "+str(player[1])+" to be ready (You have 5 minutes)",inline=False)
+			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 			host = await message.channel.send(content=None,tts=False,embed=embed)
 			await host.add_reaction('✅')
 			def check(reaction, user):
@@ -794,6 +828,7 @@ async def on_message(message):
 			except asyncio.TimeoutError:
 				embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" VS "+str(player[1]), color=0xff0000)
 				embed.add_field(name="Status",value="Battle Canceled",inline=False)
+				embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 				await host.edit(content=None,tts=False,embed=embed)
 				await host.clear_reaction('✅')
 			else:
@@ -807,6 +842,7 @@ async def on_message(message):
 					if grille[x] == -1:
 						display.append(hud[x])
 				embed.add_field(name="Grid",value=display[0]+display[1]+display[2]+"\n"+display[3]+display[4]+display[5]+"\n"+display[6]+display[7]+display[8])
+				embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 				await host.edit(content=None,tts=False,embed=embed)
 				# Jeu
 				default = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮"]
@@ -814,10 +850,11 @@ async def on_message(message):
 				while True:
 					action = ""
 					embed.add_field(name="Current turn",value=str(player[turn]),inline=False)
-					await host.edit(content=None,tts=False,embed=embed)
 					if player[turn].dm_channel == None:
 						await player[turn].create_dm()
 					play = await player[turn].dm_channel.send(content="It's your turn to play! You have 5 minutes!", embed=embed)
+					embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
+					await host.edit(content=None,tts=False,embed=embed)
 					for x in react:
 						await play.add_reaction(x)
 					def checkPlay(reaction, user):
@@ -830,6 +867,7 @@ async def on_message(message):
 					except asyncio.TimeoutError:
 						embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" :regional_indicator_o: VS :regional_indicator_x: "+str(player[1]), color=0xff0000)
 						embed.add_field(name="Status",value=str(player[turn])+" failed to play in time",inline=False)
+						embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 						await host.edit(content=None,tts=False,embed=embed)
 						return
 					else:
@@ -863,9 +901,10 @@ async def on_message(message):
 									display.append(":regional_indicator_x:")
 							embed.add_field(name="Grid",value=display[0]+display[1]+display[2]+"\n"+display[3]+display[4]+display[5]+"\n"+display[6]+display[7]+display[8])
 							embed.add_field(name="Winner", value=str(player[turn]))
-							await host.edit(content=None,tts=False,embed=embed)
 							await player[0].dm_channel.send(content=None, embed=embed)
 							await player[1].dm_channel.send(content=None, embed=embed)
+							embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
+							await host.edit(content=None,tts=False,embed=embed)
 							return
 						elif -1 in grille:
 							embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" :regional_indicator_o: VS :regional_indicator_x: "+str(player[1]), color=0xffff00)
@@ -894,9 +933,10 @@ async def on_message(message):
 									display.append(":regional_indicator_x:")
 							embed.add_field(name="Grid",value=display[0]+display[1]+display[2]+"\n"+display[3]+display[4]+display[5]+"\n"+display[6]+display[7]+display[8])
 							embed.add_field(name="Winner", value="Nobody")
-							await host.edit(content=None,tts=False,embed=embed)
 							await player[0].dm_channel.send(content=None, embed=embed)
 							await player[1].dm_channel.send(content=None, embed=embed)
+							embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
+							await host.edit(content=None,tts=False,embed=embed)
 							return
 
 	# Gives info about a server
@@ -912,6 +952,7 @@ async def on_message(message):
 			embed.add_field(name="Boost:", value=str(message.channel.guild.premium_subscription_count))
 			if message.channel.guild.banner != None:
 				embed.set_image(url=message.channel.guild.banner_url)
+			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 			await message.channel.send(content=None,tts=False,embed=embed)
 		except AttributeError:
 			await message.channel.send(content="You must be in a server to execute that command",tts=False,embed=None)
