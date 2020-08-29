@@ -260,7 +260,7 @@ async def on_message(message):
 		global startup
 		async with message.channel.typing():
 			embed = discord.Embed(title="I saw chu!", description="Chu forgot to say \"Pong!\".", color=0x00ff00)
-			embed.add_field(name="Ping:",value=str(round(client.latency,4)*1000)+"ms",inline=False)
+			embed.add_field(name="Ping:",value=str(int(round(round(client.latency,4)*1000)))+"ms",inline=False)
 			embed.add_field(name="Command time:", value=str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 			embed.add_field(name="Start time:", value=str(startup.strftime("%d/%m/%Y %H:%M:%S")))
 			embed.add_field(name="Logged in time:", value=str(last_logged.strftime("%d/%m/%Y %H:%M:%S")))
@@ -278,7 +278,7 @@ async def on_message(message):
 			embed.add_field(name="Source Code",value=str('[Available on Github](https://github.com/The10axe/The10bot-renewal)'), inline=False)
 			embed.add_field(name="Official Server", value=str('[Discord Invite](https://discord.gg/YHy8fVV)'), inline=False)
 			embed.add_field(name="Current version", value="Stable")
-			embed.add_field(name="Last Update", value="29/08/2020 - 13:05", inline=False)
+			embed.add_field(name="Last Update", value="29/08/2020 - 14:05", inline=False)
 			embed.add_field(name="Currently watching", value=str(len(client.guilds))+" servers", inline=False)
 			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 			info = await client.application_info()
