@@ -278,7 +278,7 @@ async def on_message(message):
 			embed.add_field(name="Source Code",value=str('[Available on Github](https://github.com/The10axe/The10bot-renewal)'), inline=False)
 			embed.add_field(name="Official Server", value=str('[Discord Invite](https://discord.gg/YHy8fVV)'), inline=False)
 			embed.add_field(name="Current version", value="Stable")
-			embed.add_field(name="Last Update", value="29/08/2020 - 14:05", inline=False)
+			embed.add_field(name="Last Update", value="05/09/2020 - 14:40", inline=False)
 			embed.add_field(name="Currently watching", value=str(len(client.guilds))+" servers", inline=False)
 			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 			info = await client.application_info()
@@ -821,35 +821,37 @@ async def on_message(message):
 			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 			host = await message.channel.send(content=None,tts=False,embed=embed)
 			await host.add_reaction('✅')
-			def check(reaction, user):
-				return (user == player[1]) and (str(reaction.emoji) == '✅') and (reaction.message.id == host.id)
-			try:
-				reaction, user = await client.wait_for('reaction_add', timeout=300.0, check=check)
-			except asyncio.TimeoutError:
-				embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" VS "+str(player[1]), color=0xff0000)
-				embed.add_field(name="Status",value="Battle Canceled",inline=False)
-				embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
-				await host.edit(content=None,tts=False,embed=embed)
-				await host.clear_reaction('✅')
-			else:
-				await host.clear_reaction('✅')
-				turn = random.randint(0,1)
-				grille = [-1,-1,-1,-1,-1,-1,-1,-1,-1]
-				hud = [":regional_indicator_a:", ":regional_indicator_b:", ":regional_indicator_c:", ":regional_indicator_d:", ":regional_indicator_e:", ":regional_indicator_f:", ":regional_indicator_g:", ":regional_indicator_h:", ":regional_indicator_i:"]
-				embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" :regional_indicator_o: VS :regional_indicator_x: "+str(player[1]), color=0xffff00)
-				display = []
-				for x in range(0,len(grille)):
-					if grille[x] == -1:
-						display.append(hud[x])
-				embed.add_field(name="Grid",value=display[0]+display[1]+display[2]+"\n"+display[3]+display[4]+display[5]+"\n"+display[6]+display[7]+display[8])
-				embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
-				await host.edit(content=None,tts=False,embed=embed)
-				# Jeu
-				default = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮"]
-				react = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮"]
-				while True:
-					action = ""
-					embed.add_field(name="Current turn",value=str(player[turn]),inline=False)
+			if player[1] != client.user:
+				def check(reaction, user):
+					return (user == player[1]) and (str(reaction.emoji) == '✅') and (reaction.message.id == host.id)
+				try:
+					reaction, user = await client.wait_for('reaction_add', timeout=300.0, check=check)
+				except asyncio.TimeoutError:
+					embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" VS "+str(player[1]), color=0xff0000)
+					embed.add_field(name="Status",value="Battle Canceled",inline=False)
+					embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
+					await host.edit(content=None,tts=False,embed=embed)
+					await host.clear_reaction('✅')
+					return		
+			await host.clear_reaction('✅')
+			turn = random.randint(0,1)
+			grille = [-1,-1,-1,-1,-1,-1,-1,-1,-1]
+			hud = [":regional_indicator_a:", ":regional_indicator_b:", ":regional_indicator_c:", ":regional_indicator_d:", ":regional_indicator_e:", ":regional_indicator_f:", ":regional_indicator_g:", ":regional_indicator_h:", ":regional_indicator_i:"]
+			embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" :regional_indicator_o: VS :regional_indicator_x: "+str(player[1]), color=0xffff00)
+			display = []
+			for x in range(0,len(grille)):
+				if grille[x] == -1:
+					display.append(hud[x])
+			embed.add_field(name="Grid",value=display[0]+display[1]+display[2]+"\n"+display[3]+display[4]+display[5]+"\n"+display[6]+display[7]+display[8])
+			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
+			await host.edit(content=None,tts=False,embed=embed)
+			# Jeu
+			default = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮"]
+			react = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮"]
+			while True:
+				action = ""
+				embed.add_field(name="Current turn",value=str(player[turn]),inline=False)
+				if player[turn] != client.user:
 					if player[turn].dm_channel == None:
 						await player[turn].create_dm()
 					play = await player[turn].dm_channel.send(content="It's your turn to play! You have 5 minutes!", embed=embed)
@@ -870,74 +872,152 @@ async def on_message(message):
 						embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 						await host.edit(content=None,tts=False,embed=embed)
 						return
-					else:
-						for x in range(0,9):
-							if action == default[x]:
-								grille[x] = turn
-						react.remove(action)
-						winner = -1
-						if (((grille[0] == grille[1]) and (grille[1] == grille[2])) or ((grille[0] == grille[3]) and (grille[3] == grille[6])) or ((grille[0] == grille[4]) and (grille[4] == grille[8]))) and (grille[0] != -1):
-							winner = 0
-						elif ((grille[3] == grille[4]) and (grille[4] == grille[5])) and (grille[3] != -1):
-							winner = 3
-						elif (((grille[6] == grille[7]) and (grille[7] == grille[8])) or ((grille[6] == grille[4]) and (grille[4] == grille[2]))) and (grille[6] != -1):
-							winner = 6
-						elif (grille[1] == grille[4]) and (grille[4] == grille[7]) and (grille[1] != -1):
-							winner = 1
-						elif (grille[2] == grille[5]) and (grille[5] == grille[8]) and (grille[2] != -1):
-							winner = 2
-						if winner != -1:
-							print("Partie de morpion")
-							print(winner)
-							print(grille)
-							embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" :regional_indicator_o: VS :regional_indicator_x: "+str(player[1]), color=0x00ff00)
-							display = []
-							for x in range(0,len(grille)):
-								if grille[x] == -1:
-									display.append(hud[x])
-								elif grille[x] == 0:
-									display.append(":regional_indicator_o:")
-								else:
-									display.append(":regional_indicator_x:")
-							embed.add_field(name="Grid",value=display[0]+display[1]+display[2]+"\n"+display[3]+display[4]+display[5]+"\n"+display[6]+display[7]+display[8])
-							embed.add_field(name="Winner", value=str(player[turn]))
-							await player[0].dm_channel.send(content=None, embed=embed)
-							await player[1].dm_channel.send(content=None, embed=embed)
-							embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
-							await host.edit(content=None,tts=False,embed=embed)
-							return
-						elif -1 in grille:
-							embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" :regional_indicator_o: VS :regional_indicator_x: "+str(player[1]), color=0xffff00)
-							display = []
-							for x in range(0,len(grille)):
-								if grille[x] == -1:
-									display.append(hud[x])
-								elif grille[x] == 0:
-									display.append(":regional_indicator_o:")
-								else:
-									display.append(":regional_indicator_x:")
-							embed.add_field(name="Grid",value=display[0]+display[1]+display[2]+"\n"+display[3]+display[4]+display[5]+"\n"+display[6]+display[7]+display[8])
-							if turn == 0:
-								turn = 1
-							else:
-								turn = 0
+				else:
+					# IA
+					possibiliter = [0,0,0,0,0,0,0,0,0]
+					for x in range(0,9):
+						temp = [-1,-1,-1,-1,-1,-1,-1,-1,-1]
+						for y in range(0,9):
+							temp[y] = grille[y]
+						if temp[x] != -1: # Check if we can play
+							possibiliter[x] = -1
 						else:
-							embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" :regional_indicator_o: VS :regional_indicator_x: "+str(player[1]), color=0x00ffff)
-							display = []
-							for x in range(0,len(grille)):
-								if grille[x] == -1:
-									display.append(hud[x])
-								elif grille[x] == 0:
-									display.append(":regional_indicator_o:")
+							# Check if we can win
+							temp[x] = turn
+							winner = -1
+							if (((temp[0] == temp[1]) and (temp[1] == temp[2])) or ((temp[0] == temp[3]) and (temp[3] == temp[6])) or ((temp[0] == temp[4]) and (temp[4] == temp[8]))) and (temp[0] == temp[x]):
+								winner = 0
+							elif ((temp[3] == temp[4]) and (temp[4] == temp[5])) and (temp[3] == temp[x]):
+								winner = 3
+							elif (((temp[6] == temp[7]) and (temp[7] == temp[8])) or ((temp[6] == temp[4]) and (temp[4] == temp[2]))) and (temp[6] == temp[x]):
+								winner = 6
+							elif (temp[1] == temp[4]) and (temp[4] == temp[7]) and (temp[1] == temp[x]):
+								winner = 1
+							elif (temp[2] == temp[5]) and (temp[5] == temp[8]) and (temp[2] == temp[x]):
+								winner = 2
+							if winner != -1: #If we can, give it the highest priority because it can end the game
+								possibiliter[x] = 1000000
+							else:
+								# Check if we can lose
+								if turn == 1:
+									temp[x] = 0
 								else:
-									display.append(":regional_indicator_x:")
-							embed.add_field(name="Grid",value=display[0]+display[1]+display[2]+"\n"+display[3]+display[4]+display[5]+"\n"+display[6]+display[7]+display[8])
-							embed.add_field(name="Winner", value="Nobody")
-							await player[0].dm_channel.send(content=None, embed=embed)
-							await player[1].dm_channel.send(content=None, embed=embed)
-							embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
-							await host.edit(content=None,tts=False,embed=embed)
-							return
+									temp[x] = 1
+								winner = -1
+								if (((temp[0] == temp[1]) and (temp[1] == temp[2])) or ((temp[0] == temp[3]) and (temp[3] == temp[6])) or ((temp[0] == temp[4]) and (temp[4] == temp[8]))) and (temp[0] == temp[x]):
+									winner = 0
+								elif ((temp[3] == temp[4]) and (temp[4] == temp[5])) and (temp[3] == temp[x]):
+									winner = 3
+								elif (((temp[6] == temp[7]) and (temp[7] == temp[8])) or ((temp[6] == temp[4]) and (temp[4] == temp[2]))) and (temp[6] == temp[x]):
+									winner = 6
+								elif (temp[1] == temp[4]) and (temp[4] == temp[7]) and (temp[1] == temp[x]):
+									winner = 1
+								elif (temp[2] == temp[5]) and (temp[5] == temp[8]) and (temp[2] == temp[x]):
+									winner = 2
+								if winner != -1: #If it can, give it the high priority because it can end the game
+									possibiliter[x] = 100000
+								else:
+									# Check for the best attack place
+									temp[x] = turn
+									if x == 4:
+										possibiliter[x] = 10000
+									else:
+										for offset in range(0,3): # We check every line
+											if x in range(3*offset,3*(offset+1)):
+												for y in range(3*offset,3*(offset+1)):
+													if temp[y] == turn:
+														possibiliter[x] = possibiliter[x] + 1
+										for offset in range(0,3): # We check every collumn
+											if x in [(0+offset),(3+offset),(6+offset)]:
+												for y in [(0+offset),(3+offset),(6+offset)]:
+													if temp[y] == turn:
+														possibiliter[x] = possibiliter[x] + 1
+										if x in [0,4,8]: #We check first diagonal
+											for y in [0,4,8]:
+												if temp[y] == turn:
+													possibiliter[x] = possibiliter[x] + 1
+										if x in [2,4,6]: #We check second
+											for y in [2,4,6]:
+												if temp[y] == turn:
+													possibiliter[x] = possibiliter[x] + 1
+					# Check which possibility is the highest
+					highest = -10
+					action = []
+					for x in range(0,9):
+						if possibiliter[x] > highest:
+							highest = possibiliter[x]
+					for x in range(0,9):
+						if possibiliter[x] == highest:
+							action.append(x)
+					action = random.choice(action)
+					if action != -1:
+						action = default[action]
+				for x in range(0,9):
+					if action == default[x]:
+						grille[x] = turn
+				react.remove(action)
+				winner = -1
+				if (((grille[0] == grille[1]) and (grille[1] == grille[2])) or ((grille[0] == grille[3]) and (grille[3] == grille[6])) or ((grille[0] == grille[4]) and (grille[4] == grille[8]))) and (grille[0] != -1):
+					winner = 0
+				elif ((grille[3] == grille[4]) and (grille[4] == grille[5])) and (grille[3] != -1):
+					winner = 3
+				elif (((grille[6] == grille[7]) and (grille[7] == grille[8])) or ((grille[6] == grille[4]) and (grille[4] == grille[2]))) and (grille[6] != -1):
+					winner = 6
+				elif (grille[1] == grille[4]) and (grille[4] == grille[7]) and (grille[1] != -1):
+					winner = 1
+				elif (grille[2] == grille[5]) and (grille[5] == grille[8]) and (grille[2] != -1):
+					winner = 2
+				if winner != -1:
+					embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" :regional_indicator_o: VS :regional_indicator_x: "+str(player[1]), color=0x00ff00)
+					display = []
+					for x in range(0,len(grille)):
+						if grille[x] == -1:
+							display.append(hud[x])
+						elif grille[x] == 0:
+							display.append(":regional_indicator_o:")
+						else:
+							display.append(":regional_indicator_x:")
+					embed.add_field(name="Grid",value=display[0]+display[1]+display[2]+"\n"+display[3]+display[4]+display[5]+"\n"+display[6]+display[7]+display[8])
+					embed.add_field(name="Winner", value=str(player[turn]))
+					await player[0].dm_channel.send(content=None, embed=embed)
+					if player[1] != client.user:
+						await player[1].dm_channel.send(content=None, embed=embed)
+					embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
+					await host.edit(content=None,tts=False,embed=embed)
+					return
+				elif -1 in grille:
+					embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" :regional_indicator_o: VS :regional_indicator_x: "+str(player[1]), color=0xffff00)
+					display = []
+					for x in range(0,len(grille)):
+						if grille[x] == -1:
+							display.append(hud[x])
+						elif grille[x] == 0:
+							display.append(":regional_indicator_o:")
+						else:
+							display.append(":regional_indicator_x:")
+					embed.add_field(name="Grid",value=display[0]+display[1]+display[2]+"\n"+display[3]+display[4]+display[5]+"\n"+display[6]+display[7]+display[8])
+					if turn == 0:
+						turn = 1
+					else:
+						turn = 0
+				else:
+					embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" :regional_indicator_o: VS :regional_indicator_x: "+str(player[1]), color=0x00ffff)
+					display = []
+					for x in range(0,len(grille)):
+						if grille[x] == -1:
+							display.append(hud[x])
+						elif grille[x] == 0:
+							display.append(":regional_indicator_o:")
+						else:
+							display.append(":regional_indicator_x:")
+					embed.add_field(name="Grid",value=display[0]+display[1]+display[2]+"\n"+display[3]+display[4]+display[5]+"\n"+display[6]+display[7]+display[8])
+					embed.add_field(name="Winner", value="Nobody")
+					await player[0].dm_channel.send(content=None, embed=embed)
+					if player[1] != client.user:
+						await player[1].dm_channel.send(content=None, embed=embed)
+					embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
+					await host.edit(content=None,tts=False,embed=embed)
+					return
 
 	# Gives info about a server
 	if message.content.startswith(prefix+'server'):
