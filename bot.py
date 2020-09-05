@@ -118,7 +118,7 @@ async def on_message(message):
 					embed.add_field(name="/mc", value="Show's the Minecraft's server IP")
 				elif info.owner == message.author:
 					embed.add_field(name="/mc [-toggle]", value="Show's the Minecraft's server IP")
-				embed.add_field(name="/ttt <user>", value="Start a Tic-Tac-Toe game against someone")
+				embed.add_field(name="/ttt [-self:<true|false>] <user>", value="Start a Tic-Tac-Toe game against someone")
 				embed.add_field(name="/server", value="Gives info about the server you trigger the command in!")
 			embed.set_footer(text=str(message.author), icon_url=message.author.avatar_url)
 			await message.channel.send(content=None,tts=False,embed=embed)
@@ -278,7 +278,7 @@ async def on_message(message):
 			embed.add_field(name="Source Code",value=str('[Available on Github](https://github.com/The10axe/The10bot-renewal)'), inline=False)
 			embed.add_field(name="Official Server", value=str('[Discord Invite](https://discord.gg/YHy8fVV)'), inline=False)
 			embed.add_field(name="Current version", value="Stable")
-			embed.add_field(name="Last Update", value="05/09/2020 - 14:40", inline=False)
+			embed.add_field(name="Last Update", value="05/09/2020 - 15:10", inline=False)
 			embed.add_field(name="Currently watching", value=str(len(client.guilds))+" servers", inline=False)
 			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 			info = await client.application_info()
@@ -815,7 +815,17 @@ async def on_message(message):
 			await message.channel.send("Please ping a player to play against.")
 			return
 		else:
-			player = [message.author,message.mentions[0]]
+			alone = False
+			traitement = message.content.split(" ")
+			for x in range(1,len(traitement)):
+				if traitement[x].startswith("-"):
+					if traitement[x].startswith("-self:"):
+						if bool(traitement[x][7:].lower().capitalize()) in [True, False]:
+							alone = bool(traitement[x][7:].lower().capitalize())
+			if alone == False:
+				player = [message.author,message.mentions[0]]
+			else:
+				player = [client.user,client.user]
 			embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" VS "+str(player[1]), color=0xff0000)
 			embed.add_field(name="Status",value="Waiting for "+str(player[1])+" to be ready (You have 5 minutes)",inline=False)
 			embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
@@ -979,7 +989,8 @@ async def on_message(message):
 							display.append(":regional_indicator_x:")
 					embed.add_field(name="Grid",value=display[0]+display[1]+display[2]+"\n"+display[3]+display[4]+display[5]+"\n"+display[6]+display[7]+display[8])
 					embed.add_field(name="Winner", value=str(player[turn]))
-					await player[0].dm_channel.send(content=None, embed=embed)
+					if player[0] != client.user:
+						await player[0].dm_channel.send(content=None, embed=embed)
 					if player[1] != client.user:
 						await player[1].dm_channel.send(content=None, embed=embed)
 					embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
@@ -1012,7 +1023,8 @@ async def on_message(message):
 							display.append(":regional_indicator_x:")
 					embed.add_field(name="Grid",value=display[0]+display[1]+display[2]+"\n"+display[3]+display[4]+display[5]+"\n"+display[6]+display[7]+display[8])
 					embed.add_field(name="Winner", value="Nobody")
-					await player[0].dm_channel.send(content=None, embed=embed)
+					if player[0] != client.user:
+						await player[0].dm_channel.send(content=None, embed=embed)
 					if player[1] != client.user:
 						await player[1].dm_channel.send(content=None, embed=embed)
 					embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
