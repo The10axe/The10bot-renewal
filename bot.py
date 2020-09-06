@@ -929,43 +929,39 @@ async def on_message(message):
 								else:
 									# Check for the best attack place
 									temp[x] = turn
-									if x == 4:
-										possibiliter[x] = 10000
-									else:
-										for offset in range(0,3): # We check every line
-											if x in range(3*offset,3*(offset+1)):
-												for y in range(3*offset,3*(offset+1)):
-													if temp[y] == turn:
-														possibiliter[x] = possibiliter[x] + 2
-													elif temp[y] == -1:
-														possibiliter[x] = possibiliter[x] + 1
-													else:
-														possibiliter[x] = possibiliter[x] - 2
-										for offset in range(0,3): # We check every collumn
-											if x in [(0+offset),(3+offset),(6+offset)]:
-												for y in [(0+offset),(3+offset),(6+offset)]:
-													if temp[y] == turn:
-														possibiliter[x] = possibiliter[x] + 2
-													elif temp[y] == -1:
-														possibiliter[x] = possibiliter[x] + 1
-													else:
-														possibiliter[x] = possibiliter[x] - 2
-										if x in [0,4,8]: #We check first diagonal
-											for y in [0,4,8]:
+									for offset in range(0,3): # We check every line
+										if x in range(3*offset,3*(offset+1)):
+											for y in range(3*offset,3*(offset+1)):
 												if temp[y] == turn:
 													possibiliter[x] = possibiliter[x] + 2
 												elif temp[y] == -1:
 													possibiliter[x] = possibiliter[x] + 1
 												else:
 													possibiliter[x] = possibiliter[x] - 2
-										if x in [2,4,6]: #We check second
-											for y in [2,4,6]:
+										if x in [(0+offset),(3+offset),(6+offset)]:
+											for y in [(0+offset),(3+offset),(6+offset)]:
 												if temp[y] == turn:
 													possibiliter[x] = possibiliter[x] + 2
 												elif temp[y] == -1:
 													possibiliter[x] = possibiliter[x] + 1
 												else:
 													possibiliter[x] = possibiliter[x] - 2
+									if x in [0,4,8]: #We check first diagonal
+										for y in [0,4,8]:
+											if temp[y] == turn:
+												possibiliter[x] = possibiliter[x] + 2
+											elif temp[y] == -1:
+												possibiliter[x] = possibiliter[x] + 1
+											else:
+												possibiliter[x] = possibiliter[x] - 2
+									if x in [2,4,6]: #We check second
+										for y in [2,4,6]:
+											if temp[y] == turn:
+												possibiliter[x] = possibiliter[x] + 2
+											elif temp[y] == -1:
+												possibiliter[x] = possibiliter[x] + 1
+											else:
+												possibiliter[x] = possibiliter[x] - 2
 					# Check which possibility is the highest
 					highest = -10
 					action = []
