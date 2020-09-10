@@ -858,22 +858,22 @@ async def on_message(message):
 			# Jeu
 			default = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮"]
 			react = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮"]
+			for x in react:
+				await host.add_reaction(x)
 			while True:
 				action = ""
 				embed.add_field(name="Current turn",value=str(player[turn]),inline=False)
 				if player[turn] != client.user:
 					if player[turn].dm_channel == None:
 						await player[turn].create_dm()
-					play = await player[turn].dm_channel.send(content="It's your turn to play! You have 5 minutes!", embed=embed)
+					await player[turn].dm_channel.send(content="It's your turn to play! You have 5 minutes! You can play on the server: <#"+str(host.channel.id)+">", embed=embed)
 					embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 					await host.edit(content=None,tts=False,embed=embed)
-					for x in react:
-						await play.add_reaction(x)
 					def checkPlay(reaction, user):
 						nonlocal action
 						nonlocal turn
 						action = str(reaction.emoji)
-						return (user == player[turn]) and (str(reaction.emoji) in react) and (reaction.message.id == play.id)
+						return (user == player[turn]) and (str(reaction.emoji) in react) and (reaction.message.id == host.id)
 					try:
 						reaction, user = await client.wait_for('reaction_add', timeout=300.0, check=checkPlay)
 					except asyncio.TimeoutError:
@@ -978,6 +978,7 @@ async def on_message(message):
 					if action == default[x]:
 						grille[x] = turn
 				react.remove(action)
+				await host.clear_reaction(action)
 				winner = -1
 				if (((grille[0] == grille[1]) and (grille[1] == grille[2])) or ((grille[0] == grille[3]) and (grille[3] == grille[6])) or ((grille[0] == grille[4]) and (grille[4] == grille[8]))) and (grille[0] != -1):
 					winner = 0
@@ -1001,12 +1002,11 @@ async def on_message(message):
 							display.append(":regional_indicator_x:")
 					embed.add_field(name="Grid",value=display[0]+display[1]+display[2]+"\n"+display[3]+display[4]+display[5]+"\n"+display[6]+display[7]+display[8])
 					embed.add_field(name="Winner", value=str(player[turn]))
-					if player[0] != client.user:
-						await player[0].dm_channel.send(content=None, embed=embed)
-					if player[1] != client.user:
-						await player[1].dm_channel.send(content=None, embed=embed)
 					embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
+					for emote in react:
+						await host.clear_reaction(emote)
 					await host.edit(content=None,tts=False,embed=embed)
+					await host.add_reaction('👏')
 					return
 				elif -1 in grille:
 					embed = discord.Embed(title="Tic-Tac-Toe", description=str(player[0])+" :regional_indicator_o: VS :regional_indicator_x: "+str(player[1]), color=0xffff00)
@@ -1035,12 +1035,9 @@ async def on_message(message):
 							display.append(":regional_indicator_x:")
 					embed.add_field(name="Grid",value=display[0]+display[1]+display[2]+"\n"+display[3]+display[4]+display[5]+"\n"+display[6]+display[7]+display[8])
 					embed.add_field(name="Winner", value="Nobody")
-					if player[0] != client.user:
-						await player[0].dm_channel.send(content=None, embed=embed)
-					if player[1] != client.user:
-						await player[1].dm_channel.send(content=None, embed=embed)
 					embed.set_footer(text=message.author, icon_url=message.author.avatar_url)
 					await host.edit(content=None,tts=False,embed=embed)
+					await host.add_reaction('👏')
 					return
 
 	# Gives info about a server
